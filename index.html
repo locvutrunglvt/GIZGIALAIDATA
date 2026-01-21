@@ -2558,19 +2558,19 @@
         }
 
         .c111 {
-            height: 25.8pt
+            /* Auto-height v3.9.5 */
         }
 
         .c42 {
-            height: 31.2pt
+            /* Auto-height v3.9.5 */
         }
 
         .c70 {
-            height: 20pt
+            /* Auto-height v3.9.5 */
         }
 
         .c125 {
-            height: 42pt
+            /* Auto-height v3.9.5 */
         }
 
         .c17 {
@@ -2582,7 +2582,7 @@
         }
 
         .c120 {
-            height: 34pt
+            /* Auto-height v3.9.5 */
         }
 
         .c99 {
@@ -2590,7 +2590,9 @@
         }
 
         .c6 {
-            height: 25.5pt
+            min-height: 25.5pt;
+            height: auto;
+            /* removed fixed height for flexibility */
         }
 
         .title {
@@ -2720,8 +2722,8 @@
             <col style="width: 25pt;"> <!-- TT -->
             <col style="width: 130pt;"> <!-- Label Column 1 -->
             <col style="width: 140pt;"> <!-- Data Column 1 -->
-            <col style="width: 110pt;"> <!-- Photo Label (Internal) -->
-            <col style="width: 110pt;"> <!-- Photo Data (Internal) -->
+            <col style="width: 55pt;"> <!-- Reduced for space -->
+            <col style="width: 165pt;"> <!-- Widened 1.5x for Name/Year -->
         </colgroup>
         <tr class="c111">
             <td class="c17 c64" style="width: 25pt; text-align: center;">
@@ -4958,7 +4960,7 @@
 
         function processTables(data) {
             // 1. Process HH_members
-            const members = data.HH_members || data.Members || [];
+            const members = data['Related HH_members'] || data.HH_members || data.Members || [];
             const memberBody = document.getElementById('HH_members_BODY');
             if (memberBody && members.length > 0) {
                 const templateRow = memberBody.querySelector('tr');
