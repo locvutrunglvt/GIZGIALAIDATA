@@ -396,47 +396,98 @@
     </div>
 
     <script>
-        function initReport() {
+        /**
+         * CẤU HÌNH API & FETCH DỮ LIỆU
+         * SCRIPT_URL: Link Web App bạn cung cấp
+         */
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec";
+
+        async function initReport() {
             const params = new URLSearchParams(window.location.search);
+            const farmerID = params.get('id');
 
-            // 1. Ánh xạ dữ liệu đơn lẻ (Duyệt qua tất cả ID có trong Document)
-            const allElements = document.querySelectorAll('[id]');
-            allElements.forEach(el => {
-                const value = params.get(el.id);
-                if (value !== null && value !== '') {
-                    if (el.tagName === 'IMG') {
-                        el.src = value;
-                        el.style.display = 'block';
-                        if (el.id === 'Respondent_Image') document.getElementById('no-photo').style.display = 'none';
-                    } else {
-                        el.innerText = value;
+            // 1. Nếu có ID, ưu tiên Fetch dữ liệu từ API
+            if (farmerID) {
+                // Assuming there's a loading element, if not, this line might cause an error or do nothing.
+                // If you don't have a 'loading' element, you can remove this line.
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) loadingElement.style.display = 'flex';
+                try {
+                    const response = await fetch(SCRIPT_URL + "?id=" + farmerID);
+                    const apiData = await response.json();
+
+                    if (apiData && !apiData.error) {
+                        applyDataToUI(apiData);
+                        // Xử lý bảng con từ API (nếu có key LAND_PLOTS hoặc Plots)
+                        const plots = apiData.LAND_PLOTS || apiData.Plots;
+                        if (plots) renderPlots(plots);
                     }
+                } catch (error) {
+                    console.error("Lỗi Fetch API:", error);
                 }
-            });
+            }
 
-            // 2. Ánh xạ dữ liệu bảng (Plots)
+            // 2. Luôn ánh xạ thêm từ URL (để ghi đè hoặc bổ sung dữ liệu nhanh)
+            const urlData = {};
+            params.forEach((value, key) => { urlData[key] = value; });
+            applyDataToUI(urlData);
+
+            // 3. Nếu có tham số Plots dạng JSON trên URL
             const plotsRaw = params.get('Plots');
             if (plotsRaw) {
-                try {
-                    const plots = JSON.parse(plotsRaw);
-                    const tbody = document.getElementById('Plot_Data_Body');
-                    if (plots && plots.length > 0) {
-                        tbody.innerHTML = '';
-                        plots.forEach(p => {
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td class="text-center">${p.TT || ''}</td>
-                                    <td class="text-center">${p.Area || ''}</td>
-                                    <td class="text-center">${p.Trees || ''}</td>
-                                    <td class="text-center">${p.Year || ''}</td>
-                                    <td class="text-center">${p.Variety || ''}</td>
-                                    <td class="text-center">${p.Yield || ''}</td>
-                                </tr>`;
-                        });
-                    }
-                } catch (e) { console.error("Error parsing plots data", e); }
+                try { renderPlots(JSON.parse(plotsRaw)); } catch (e) { console.error("Error parsing plots data from URL", e); }
+            }
+
+            // Tắt màn hình chờ
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) {
+                setTimeout(() => {
+                    loadingElement.style.display = 'none';
+                }, 500);
             }
         }
+
+        function applyDataToUI(data) {
+            for (const key in data) {
+                const el = document.getElementById(key);
+                if (el) {
+                    const value = data[key];
+                    if (value !== null && value !== '') { // Check for null or empty string
+                        if (el.tagName === 'IMG') {
+                            el.src = value;
+                            el.style.display = 'block';
+                            if (el.id === 'Respondent_Image') {
+                                const noPhotoEl = document.getElementById('no-photo');
+                                if (noPhotoEl) noPhotoEl.style.display = 'none';
+                            }
+                        } else {
+                            el.innerText = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderPlots(plots) {
+            const tbody = document.getElementById('Plot_Data_Body');
+            if (tbody && plots && plots.length > 0) {
+                tbody.innerHTML = '';
+                plots.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="text-center">${p.TT || ''}</td>
+                            <td class="text-center">${p.Area || p.Area_Ha || ''}</td>
+                            <td class="text-center">${p.Trees || p.Tree_Count || ''}</td>
+                            <td class="text-center">${p.Year || p.Start_Year || ''}</td>
+                            <td class="text-center">${p.Variety || ''}</td>
+                            <td class="text-center">${p.Yield || p.Yield_2025 || ''}</td>
+                        </tr>`;
+                });
+            } else if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center italic">Không có dữ liệu vườn cây.</td></tr>';
+            }
+        }
+
         window.onload = initReport;
     </script>
 </body>
