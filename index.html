@@ -2347,7 +2347,7 @@
             font-weight: 400;
             text-decoration: none;
             vertical-align: baseline;
-            font-size: 10pt;
+            font-size: 10.5pt;
             font-family: "Arial";
             font-style: normal
         }
@@ -2387,7 +2387,7 @@
             font-weight: 700;
             text-decoration: none;
             vertical-align: baseline;
-            font-size: 10pt;
+            font-size: 10.5pt;
             font-family: "Arial";
             font-style: normal
         }
@@ -2721,11 +2721,8 @@
             <td class="c22 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">Ng&agrave;y ph&#7887;ng v&#7845;n</span></p>
             </td>
-            <td class="c17 c119" colspan="2" rowspan="1">
+            <td class="c17 c119" colspan="3" rowspan="1">
                 <p class="c41"><span id="Interview_Date" class="c0"></span></p>
-            </td>
-            <td class="c20 c17" colspan="1" rowspan="1" style="text-align: center; vertical-align: middle;">
-                <p class="c3 c15"><span id="Farmer_ID_Display" class="c0"></span></p>
             </td>
         </tr>
         <tr class="c120">
@@ -2735,12 +2732,8 @@
             <td class="c22 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">T&#7881;nh</span></p>
             </td>
-            <td class="c48 c17" colspan="1" rowspan="1">
+            <td class="c48 c17" colspan="3" rowspan="1">
                 <p class="c41"><span class="c0">&nbsp;Gia Lai</span></p>
-            </td>
-            <td id="Related_Images_CONTAINER_TOP" class="c17 c162" colspan="2" rowspan="5"
-                style="text-align: center; vertical-align: middle;">
-                <p style="color: #666; font-style: italic;">Đang tải hình ảnh...</p>
             </td>
         </tr>
         <tr class="c120">
@@ -2750,8 +2743,8 @@
             <td class="c22 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">X&atilde;</span></p>
             </td>
-            <td class="c48 c17" colspan="1" rowspan="1">
-                <p class="c41"><span id="Commune" class="c0"></span></p>
+            <td class="c47 c17" colspan="3" rowspan="1">
+                <p class="c41"><span id="Commune" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c120">
@@ -2761,8 +2754,8 @@
             <td class="c17 c22" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">Th&ocirc;n</span></p>
             </td>
-            <td class="c48 c17" colspan="1" rowspan="1">
-                <p class="c41"><span id="Village" class="c0"></span></p>
+            <td class="c147 c17" colspan="3" rowspan="1">
+                <p class="c41"><span id="Village" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c120">
@@ -2772,7 +2765,7 @@
             <td class="c22 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">T&ecirc;n ch&#7911; h&#7897;</span></p>
             </td>
-            <td class="c48 c17" colspan="1" rowspan="1">
+            <td class="c48 c17" colspan="3" rowspan="1">
                 <p class="c83"><span id="Owner_Name" class="c0"></span></p>
             </td>
         </tr>
@@ -2783,7 +2776,7 @@
             <td class="c22 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">S&#7889; &#273;i&#7879;n tho&#7841;i</span></p>
             </td>
-            <td class="c48 c17" colspan="1" rowspan="1">
+            <td class="c48 c17" colspan="3" rowspan="1">
                 <p class="c83"><span id="Phone_Number" class="c0"></span></p>
             </td>
         </tr>
@@ -4846,13 +4839,8 @@
     </table>
 
     <p class="c8"><span class="c1"></span></p>
-    <div id="RELATED_IMAGES_SECTION" style="margin-top: 30px;">
-        <p class="c83" style="text-align: center;"><span class="c69">PHỤ LỤC HÌNH ẢNH (IMAGES)</span></p>
-        <div id="Related_Images_CONTAINER"
-            style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; border: 1px solid #d9d9d9; border-radius: 8px; background-color: #fcfcfc;">
-            <!-- Images will be injected here -->
-        </div>
-    </div> <!-- Dynamic Data Loading Script -->
+    <p class="c8"><span class="c1"></span></p>
+    <!-- Dynamic Data Loading Script -->
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
 
@@ -4986,34 +4974,8 @@
         }
 
         function processImages(data) {
-            // Lấy ảnh từ mảng con "Related Images" hoặc thuộc tính "Images" của bản ghi chính
-            let images = [];
-            if (data['Related Images'] && Array.isArray(data['Related Images'])) {
-                images = data['Related Images'].map(item => item.Images || item.Image).filter(img => img);
-            }
-            if (images.length === 0) {
-                images = data['Related Images'] || data.Images || [];
-            }
-
-            const containers = ['Related_Images_CONTAINER', 'Related_Images_CONTAINER_TOP'];
-
-            containers.forEach(id => {
-                const container = document.getElementById(id);
-                if (container && images.length > 0) {
-                    container.innerHTML = '';
-                    images.forEach(imgUrl => {
-                        const img = document.createElement('img');
-                        img.src = imgUrl;
-                        img.style.maxWidth = '250px';
-                        img.style.border = '2px solid #38761d';
-                        img.style.borderRadius = '5px';
-                        img.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-                        container.appendChild(img);
-                    });
-                } else if (container) {
-                    container.innerHTML = '<p style="color: #666; font-style: italic;">Không có hình ảnh đính kèm.</p>';
-                }
-            });
+            // Function preserved for compatibility but images are removed from layout.
+            console.log("Images processing skipped as per user request.");
         }
 
         function applyCalculatedFields(data) {
