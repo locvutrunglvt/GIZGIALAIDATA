@@ -1,8 +1,29 @@
-<html>
+<html lang="vi">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Khảo sát GIZ - GIZ Survey Report</title>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style type="text/css">
+        body,
+        p,
+        li,
+        td,
+        th,
+        span,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Inter', Arial, sans-serif !important;
+        }
+
         ol.lst-kix_yuzgd2e89xi2-5.start {
             counter-reset: lst-ctn-kix_yuzgd2e89xi2-5 0
         }
@@ -2704,8 +2725,10 @@
                 <p class="c41"><span id="Interview_Date" class="c0"></span></p>
             </td>
             <td class="c20 c17" colspan="1" rowspan="1" style="text-align: center; vertical-align: middle;">
-                <p class="c3"><span class="c1">&#7843;nh ng&#432;&#7901;i &#273;&#432;&#7907;c ph&#7887;ng
+                <p class="c3"><span class="c1">&#7842;nh ng&#432;&#7901;i &#273;&#432;&#7907;c ph&#7887;ng
                         v&#7845;n</span></p>
+                <img id="Farmer_Photo" src=""
+                    style="max-width: 150px; max-height: 180px; display: none; margin: 10px auto; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             </td>
         </tr>
         <tr class="c120">
@@ -2718,7 +2741,8 @@
             <td class="c48 c17" colspan="1" rowspan="1">
                 <p class="c41"><span class="c0">&nbsp;Gia Lai</span></p>
             </td>
-            <td id="Related_Images_CONTAINER_TOP" class="c17 c162" colspan="2" rowspan="5">
+            <td id="Related_Images_CONTAINER_TOP" class="c17 c162" colspan="2" rowspan="5"
+                style="text-align: center; vertical-align: middle;">
                 <p style="color: #666; font-style: italic;">Đang tải hình ảnh...</p>
             </td>
         </tr>
@@ -4817,7 +4841,13 @@
     </table>
 
     <p class="c8"><span class="c1"></span></p>
-    <!-- Dynamic Data Loading Script -->
+    <div id="RELATED_IMAGES_SECTION" style="margin-top: 30px;">
+        <p class="c83" style="text-align: center;"><span class="c69">PHỤ LỤC HÌNH ẢNH (IMAGES)</span></p>
+        <div id="Related_Images_CONTAINER"
+            style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; border: 1px solid #d9d9d9; border-radius: 8px; background-color: #fcfcfc;">
+            <!-- Images will be injected here -->
+        </div>
+    </div> <!-- Dynamic Data Loading Script -->
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
 
@@ -4879,14 +4909,14 @@
                         const cells = row.querySelectorAll('td');
                         if (cells.length >= 9) {
                             cells[0].innerText = i + 1;
-                            cells[1].innerText = m.Member_name || '';
-                            cells[2].innerText = m.Gender || '';
-                            cells[3].innerText = m['Year of birth'] || '';
-                            cells[4].innerText = m.Ethlic || '';
-                            cells[5].innerText = m.Relatives || '';
-                            cells[6].innerText = m['Study level'] || '';
-                            cells[7].innerText = m.Participate || '';
-                            cells[8].innerText = m.Stage || '';
+                            cells[1].innerText = m.Member_name || m['Tên'] || '';
+                            cells[2].innerText = m.Gender || m['Giới tính'] || '';
+                            cells[3].innerText = m['Year of birth'] || m['Năm sinh'] || '';
+                            cells[4].innerText = m.Ethlic || m['Dân tộc'] || '';
+                            cells[5].innerText = m.Relatives || m['Quan hệ với chủ hộ'] || '';
+                            cells[6].innerText = m['Study level'] || m['Học vấn cao nhất'] || '';
+                            cells[7].innerText = m.Participate || m['Thành viên có tham gia sản xuất cà phê không?'] || '';
+                            cells[8].innerText = m.Stage || m['Tham gia công đoạn nào'] || '';
                         }
                         memberBody.appendChild(row);
                     });
@@ -4905,19 +4935,19 @@
                         const cells = row.querySelectorAll('td');
                         if (cells.length >= 14) {
                             cells[0].innerText = i + 1;
-                            cells[1].innerText = p.Area_Ha || '';
-                            cells[2].innerText = p['Forest area per plot'] || '';
-                            cells[3].innerText = p.Tree_Count || '';
-                            cells[4].innerText = p.Intercropping_YN || '';
-                            cells[5].innerText = p.Tree_Intercropping || '';
-                            cells[6].innerText = p.Harvest_Area || '';
-                            cells[7].innerText = p.Yield_2025 || '';
-                            cells[8].innerText = p.Ownership_Type || '';
-                            cells[9].innerText = p.Start_Year || '';
-                            cells[10].innerText = p.Recent_Year || '';
-                            cells[11].innerText = p.Previous_Crop || '';
-                            cells[12].innerText = p.Forest_Distance || '';
-                            cells[13].innerText = p.GPS_Mapped_YN || '';
+                            cells[1].innerText = p.Area_Ha || p['Diện tích (ha)'] || '';
+                            cells[2].innerText = p['Forest area per plot'] || p['Diện tích đất rừng trên mảnh (ha)'] || '';
+                            cells[3].innerText = p.Tree_Count || p['Số lượng gốc cà phê'] || '';
+                            cells[4].innerText = p.Intercropping_YN || p['Có trồng xen cây khác'] || '';
+                            cells[5].innerText = p.Tree_Intercropping || p['Cây trồng xen'] || '';
+                            cells[6].innerText = p.Harvest_Area || p['Diện tích cho thu hoạch'] || '';
+                            cells[7].innerText = p.Yield_2025 || p['Sản lượng năm 2025 (tấn)'] || '';
+                            cells[8].innerText = p.Ownership_Type || p['Hình thức sở hữu'] || '';
+                            cells[9].innerText = p.Start_Year || p['Năm bắt đầu trồng'] || '';
+                            cells[10].innerText = p.Recent_Year || p['Năm trồng cà phê gần nhất'] || '';
+                            cells[11].innerText = p.Previous_Crop || p['Cây trồng trước khi trồng'] || '';
+                            cells[12].innerText = p.Forest_Distance || p['Khoảng cách tới rừng gần nhất? (km)'] || '';
+                            cells[13].innerText = p.GPS_Mapped_YN || p['Đất của bạn đã được lập bản đồ địa lý chưa?'] || '';
                         }
                         plotBody.appendChild(row);
                     });
@@ -4936,13 +4966,13 @@
                         const cells = row.querySelectorAll('td');
                         if (cells.length >= 8) {
                             cells[0].innerText = a.TT || i + 1;
-                            cells[1].innerText = a.Certificate || '';
-                            cells[2].innerText = a.Is_Known || '';
-                            cells[3].innerText = a.Who_Knows_Most || '';
-                            cells[4].innerText = a.Is_Beneficial || '';
-                            cells[5].innerText = a.Is_Practiced || '';
-                            cells[6].innerText = a.Is_Certified || '';
-                            cells[7].innerText = a.Who_Practices || '';
+                            cells[1].innerText = a.Certificate || a['TT'] || '';
+                            cells[2].innerText = a.Is_Known || a['Chứng chỉ'] || '';
+                            cells[3].innerText = a.Who_Knows_Most || a['Tên chứng chỉ'] || '';
+                            cells[4].innerText = a.Is_Beneficial || a['Hộ có tham gia không?'] || '';
+                            cells[5].innerText = a.Is_Practiced || a['Năm bắt đầu'] || '';
+                            cells[6].innerText = a.Is_Certified || a['Tình trạng'] || '';
+                            cells[7].innerText = a.Who_Practices || a['Ghi chú'] || '';
                         }
                         agriBody.appendChild(row);
                     });
