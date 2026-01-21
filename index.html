@@ -186,6 +186,10 @@
             padding: 0
         }
 
+        tr {
+            height: 1cm;
+        }
+
         .c55 {
             border-right-style: solid;
             padding: 2.8pt 2.8pt 2.8pt 2.8pt;
@@ -2420,7 +2424,9 @@
         .c60 {
             border-spacing: 0;
             border-collapse: collapse;
-            margin-right: auto
+            margin-right: auto;
+            width: 100%;
+            table-layout: fixed;
         }
 
         .c33 {
@@ -2463,6 +2469,22 @@
             padding-bottom: 0pt;
             line-height: 0.06;
             text-align: left
+        }
+
+        .c-header-top {
+            color: #38761d;
+            font-weight: 700;
+            font-size: 14pt;
+            font-family: Arial, sans-serif;
+        }
+
+        .c-respondent-p {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .c-page-break {
+            page-break-before: always;
+            display: none;
         }
 
         .c83 {
@@ -2557,25 +2579,6 @@
             margin-left: 4.3pt
         }
 
-        .c111 {
-            min-height: 1cm;
-            height: auto;
-        }
-
-        .c42 {
-            min-height: 1cm;
-            height: auto;
-        }
-
-        .c70 {
-            min-height: 1cm;
-            height: auto;
-        }
-
-        .c125 {
-            min-height: 1cm;
-            height: auto;
-        }
 
         .c17 {
             padding: 5pt 5pt 5pt 5pt
@@ -2585,19 +2588,11 @@
             font-size: 10pt
         }
 
-        .c120 {
-            min-height: 1cm;
-            height: auto;
-        }
 
         .c99 {
             padding: 2.8pt 2.8pt 2.8pt 2.8pt
         }
 
-        .c6 {
-            min-height: 1cm;
-            height: auto;
-        }
 
         .title {
             padding-top: 24pt;
@@ -2702,6 +2697,64 @@
             font-style: italic;
             text-align: left
         }
+
+        .c-header-title {
+            color: #38761d;
+            font-family: Arial, sans-serif;
+            font-size: 14pt;
+            font-weight: 700;
+        }
+
+        .c-header-subtitle {
+            color: #b45f06;
+            font-size: 23pt;
+            font-weight: 700;
+        }
+
+        .c-txt-center {
+            text-align: center;
+        }
+
+        .c-photo-cell {
+            text-align: center;
+            vertical-align: middle;
+            background: #fafafa;
+            border: 1px solid #d9d9d9;
+        }
+
+        .c-photo-label-p {
+            margin-bottom: 8px;
+        }
+
+        .c-photo-span {
+            color: #38761d;
+            font-family: 'Inter', sans-serif;
+            font-size: 9pt;
+        }
+
+        .c-img-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .c-farmer-img {
+            max-width: 180px;
+            max-height: 200px;
+            display: none;
+            border: 2px solid #38761d;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .c-img-notice {
+            color: #666;
+            font-style: italic;
+            font-size: 8pt;
+            font-family: 'Inter', sans-serif;
+        }
     </style>
 </head>
 
@@ -2716,175 +2769,163 @@
                 style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px;" title="Logo GIZ">
         </span>
     </h1>
-    <h2 class="c3 c71"><span class="c93">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</span></h2>
-    <h2 class="c3 c71"><span class="c93">VI&#7878;N KINH T&#7870; V&Agrave; TH&#7874; CH&#7870; N&Ocirc;NG
-            NGHI&#7878;P</span></h2>
-    <h2 class="c71 c78"><span class="c138">B&#7842;NG H&#7886;I H&#7896; N&Ocirc;NG D&Acirc;N</span></h2>
-    <table class="c60" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+    <h2 class="c3 c71 c-header-top">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</h2>
+    <h2 class="c3 c71 c-header-title">VI&#7878;N KINH T&#7870; V&Agrave; TH&#7874; CH&#7870; N&Ocirc;NG
+        NGHI&#7878;P</h2>
+    <h2 class="c71 c78 c-header-subtitle">B&#7842;NG H&#7886;I H&#7896; N&Ocirc;NG D&Acirc;N</h2>
+    <table class="c60">
         <!-- Column definitions for consistency -->
         <colgroup>
-            <col style="width: 25pt;"> <!-- TT -->
-            <col style="width: 130pt;"> <!-- Label Column 1 -->
-            <col style="width: 140pt;"> <!-- Data Column 1 -->
-            <col style="width: 55pt;"> <!-- Reduced for space -->
-            <col style="width: 165pt;"> <!-- Widened 1.5x for Name/Year -->
+            <col style="width: 25pt;">
+            <col style="width: 130pt;">
+            <col style="width: 140pt;">
+            <col style="width: 55pt;">
+            <col style="width: 165pt;">
         </colgroup>
-        <tr class="c111">
-            <td class="c17 c64" style="width: 25pt; text-align: center;">
-                <p class="c3"><span class="c1">1</span></p>
-            </td>
-            <td class="c22 c17" style="width: 130pt;">
-                <p class="c7"><span class="c1">Ng&agrave;y ph&#7887;ng v&#7845;n</span></p>
-            </td>
-            <td class="c17 c119" style="width: 140pt;">
-                <p class="c41"><span id="Interview_Date" class="c0"></span></p>
-            </td>
-            <td id="Main_Photo_Cell" class="c17" colspan="2" rowspan="6"
-                style="text-align: center; vertical-align: middle; background: #fafafa; border: 1px solid #d9d9d9; width: 220pt;">
-                <p class="c3" style="margin-bottom: 8px;"><span class="c0"
-                        style="color: #38761d; font-family: 'Inter', sans-serif; font-size: 9pt;">ẢNH NGƯỜI PHỎNG
-                        VẤN</span></p>
-                <div id="Related_Images_CONTAINER_TOP"
-                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 180px;">
-                    <img id="Farmer_Photo" src=""
-                        style="max-width: 180px; max-height: 200px; display: none; border: 2px solid #38761d; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                    <p id="Image_Loading_Notice"
-                        style="color: #666; font-style: italic; font-size: 8pt; font-family: 'Inter', sans-serif;">Đang
-                        tải hình ảnh...</p>
-                </div>
-            </td>
-        </tr>
-        <tr class="c120">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">2</span></p>
-            </td>
-            <td class="c22 c17">
-                <p class="c7"><span class="c1">T&#7881;nh</span></p>
-            </td>
-            <td class="c48 c17">
-                <p class="c41"><span class="c0">&nbsp;Gia Lai</span></p>
-            </td>
-        </tr>
-        <tr class="c120">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">4</span></p>
-            </td>
-            <td class="c22 c17">
-                <p class="c7"><span class="c1">X&atilde;</span></p>
-            </td>
-            <td class="c48 c17">
-                <p class="c41"><span id="Commune" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c120">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">5</span></p>
-            </td>
-            <td class="c17 c22">
-                <p class="c7"><span class="c1">Th&ocirc;n</span></p>
-            </td>
-            <td class="c48 c17">
-                <p class="c41"><span id="Village" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c120">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">6</span></p>
-            </td>
-            <td class="c22 c17">
-                <p class="c7"><span class="c1">T&ecirc;n ch&#7911; h&#7897;</span></p>
-            </td>
-            <td class="c48 c17">
-                <p class="c83"><span id="Owner_Name" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c120">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">7</span></p>
-            </td>
-            <td class="c22 c17">
-                <p class="c7"><span class="c1">S&#7889; &#273;i&#7879;n tho&#7841;i</span></p>
-            </td>
-            <td class="c48 c17">
-                <p class="c83"><span id="Phone_Number" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" style="text-align: center;">
-                <p class="c3"><span class="c1">8</span></p>
-            </td>
-            <td class="c17 c75" colspan="3">
-                <p class="c7"><span class="c1">Ng&#432;&#7901;i tr&#7843; l&#7901;i ph&#7887;ng v&#7845;n</span></p>
-            </td>
-            <td class="c20 c17">
-                <p class="c3" style="font-family: 'Inter', sans-serif;"><span id="Gender_Title" class="c0"></span> <span
-                        id="Respondent_Name" class="c0"></span>, <span id="Year_of_birth" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">9</span></p>
-            </td>
-            <td class="c75 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Lo&#7841;i h&igrave;nh kinh t&#7871; c&#7911;a h&#7897;:</span></p>
-            </td>
-            <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span id="Economic_Class" class="c1"></span>
-                </p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">10</span></p>
-            </td>
-            <td class="c75 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">H&#7897; c&oacute; tham gia v&agrave;o h&#7907;p t&aacute;c x&atilde;
-                        kh&ocirc;ng?</span></p>
-            </td>
-            <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span id="Coop_Member_YN" class="c1"></span>
-                </p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">11</span></p>
-            </td>
-            <td class="c75 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">S&#7889; n&#259;m tr&#7891;ng c&agrave; ph&ecirc; c&#7911;a
-                        h&#7897;</span></p>
-            </td>
-            <td class="c17 c20" colspan="1" rowspan="1">
-                <p class="c33"><span id="Coffee_Years_Exp" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">12</span></p>
-            </td>
-            <td class="c75 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Trong 5 n&#259;m qua, h&#7897; c&oacute; chuy&#7875;n &#273;&#7893;i
-                        c&acirc;y tr&#7891;ng canh t&aacute;c t&#7915; c&agrave; ph&ecirc; sang c&acirc;y kh&aacute;c
-                        kh&ocirc;ng? &nbsp;</span></p>
-            </td>
-            <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span id="Switch_Out_Coffee" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c70">
-            <td class="c64 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">13</span></p>
-            </td>
-            <td class="c75 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Trong 5 n&#259;m qua, h&#7897; c&oacute; chuy&#7875;n &#273;&#7893;i
-                        c&acirc;y tr&#7891;ng canh t&aacute;c t&#7915; c&acirc;y kh&aacute;c sang &nbsp;c&agrave;
-                        ph&ecirc; kh&ocirc;ng? &nbsp;</span></p>
-            </td>
-            <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span id="Switch_In_Coffee" class="c1"></span>
-                </p>
-            </td>
-        </tr>
+        <tbody>
+            <tr class="c111">
+                <td class="c17 c64 c-txt-center">
+                    <p class="c3"><span class="c1">1</span></p>
+                </td>
+                <td class="c22 c17">
+                    <p class="c7"><span class="c1">Ng&agrave;y ph&#7887;ng v&#7845;n</span></p>
+                </td>
+                <td class="c17 c119">
+                    <p class="c41"><span id="Interview_Date" class="c0"></span></p>
+                </td>
+                <td id="Main_Photo_Cell" class="c17 c-photo-cell" colspan="2" rowspan="6">
+                    <p class="c3 c-photo-label-p"><span class="c0 c-photo-span">ẢNH NGƯỜI PHỎNG
+                            VẤN</span></p>
+                    <div id="Related_Images_CONTAINER_TOP" class="c-img-container">
+                        <img id="Farmer_Photo"
+                            src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                            class="c-farmer-img" alt="Ảnh người phỏng vấn">
+                        <p id="Image_Loading_Notice" class="c-img-notice">Đang
+                            tải hình ảnh...</p>
+                    </div>
+                </td>
+            </tr>
+            <tr class="c120">
+                <td class="c64 c17 c-txt-center">
+                    <p class="c3"><span class="c1">2</span></p>
+                </td>
+                <td class="c22 c17">
+                    <p class="c7"><span class="c1">T&#7881;nh</span></p>
+                </td>
+                <td class="c48 c17">
+                    <p class="c41"><span class="c0">&nbsp;Gia Lai</span></p>
+                </td>
+            </tr>
+            <tr class="c120">
+                <td class="c64 c17 c-txt-center">
+                    <p class="c3"><span class="c1">4</span></p>
+                </td>
+                <td class="c22 c17">
+                    <p class="c7"><span class="c1">X&atilde;</span></p>
+                </td>
+                <td class="c48 c17">
+                    <p class="c41"><span id="Commune" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c120">
+                <td class="c64 c17 c-txt-center">
+                    <p class="c3"><span class="c1">5</span></p>
+                </td>
+                <td class="c17 c22">
+                    <p class="c7"><span class="c1">Th&ocirc;n</span></p>
+                </td>
+                <td class="c48 c17">
+                    <p class="c41"><span id="Village" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c120">
+                <td class="c64 c17 c-txt-center">
+                    <p class="c3"><span class="c1">6</span></p>
+                </td>
+                <td class="c22 c17">
+                    <p class="c7"><span class="c1">T&ecirc;n ch&#7911; h&#7897;</span></p>
+                </td>
+                <td class="c48 c17">
+                    <p class="c83"><span id="Owner_Name" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c120">
+                <td class="c64 c17 c-txt-center">
+                    <p class="c3"><span class="c1">7</span></p>
+                </td>
+                <td class="c22 c17">
+                    <p class="c7"><span class="c1">S&#7889; &#273;i&#7879;n tho&#7841;i</span></p>
+                </td>
+                <td class="c48 c17">
+                    <p class="c83"><span id="Phone_Number" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c70">
+                <td class="c64 c17" style="text-align: center;">
+                    <p class="c3"><span class="c1">8</span></p>
+                </td>
+                <td class="c75 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Lo&#7841;i h&igrave;nh kinh t&#7871; c&#7911;a h&#7897;:</span></p>
+                </td>
+                <td class="c20 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span id="Economic_Class" class="c1"></span>
+                    </p>
+                </td>
+            </tr>
+            <tr class="c70">
+                <td class="c64 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span class="c1">10</span></p>
+                </td>
+                <td class="c75 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">H&#7897; c&oacute; tham gia v&agrave;o h&#7907;p t&aacute;c x&atilde;
+                            kh&ocirc;ng?</span></p>
+                </td>
+                <td class="c20 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span id="Coop_Member_YN" class="c1"></span>
+                    </p>
+                </td>
+            </tr>
+            <tr class="c70">
+                <td class="c64 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span class="c1">11</span></p>
+                </td>
+                <td class="c75 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">S&#7889; n&#259;m tr&#7891;ng c&agrave; ph&ecirc; c&#7911;a
+                            h&#7897;</span></p>
+                </td>
+                <td class="c17 c20" colspan="1" rowspan="1">
+                    <p class="c33"><span id="Coffee_Years_Exp" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c70">
+                <td class="c64 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span class="c1">12</span></p>
+                </td>
+                <td class="c75 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Trong 5 n&#259;m qua, h&#7897; c&oacute; chuy&#7875;n &#273;&#7893;i
+                            c&acirc;y tr&#7891;ng canh t&aacute;c t&#7915; c&agrave; ph&ecirc; sang c&acirc;y
+                            kh&aacute;c
+                            kh&ocirc;ng? &nbsp;</span></p>
+                </td>
+                <td class="c20 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span id="Switch_Out_Coffee" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c70">
+                <td class="c64 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span class="c1">13</span></p>
+                </td>
+                <td class="c75 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Trong 5 n&#259;m qua, h&#7897; c&oacute; chuy&#7875;n &#273;&#7893;i
+                            c&acirc;y tr&#7891;ng canh t&aacute;c t&#7915; c&acirc;y kh&aacute;c sang &nbsp;c&agrave;
+                            ph&ecirc; kh&ocirc;ng? &nbsp;</span></p>
+                </td>
+                <td class="c20 c17" colspan="1" rowspan="1">
+                    <p class="c33"><span id="Switch_In_Coffee" class="c1"></span>
+                    </p>
+                </td>
+            </tr>
+        </tbody>
     </table>
     <p class="c8"><span class="c1"></span></p>
     <hr style="page-break-before:always;display:none;">
@@ -2956,283 +2997,287 @@
     <p class="c8"><span class="c96 c67 c105"></span></p>
     <p class="c83"><span class="c69">B. FAMILY INCOMES</span></p>
     <table class="c60">
-        <tr class="c111">
-            <td class="c17 c132" colspan="6" rowspan="1">
-                <p class="c83"><span class="c0">H&#7897; tham gia v&agrave;o nh&#7919;ng ho&#7841;t &#273;&#7897;ng
-                        s&#7843;n xu&#7845;t, kinh doanh t&#7841;o thu nh&#7853;p n&agrave;o</span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c12 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">&nbsp;TT</span></p>
-            </td>
-            <td class="c12 c17 c154" colspan="4" rowspan="1">
-                <p class="c3"><span class="c0">&nbsp;N&#7897;i dung c&acirc;u h&#7887;i</span></p>
-            </td>
-            <td class="c14 c12 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">N&#259;m 2025</span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">1</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">a. T&#7893;ng thu nh&#7853;p c&#7911;a h&#7897; (thu nh&#7853;p
-                        r&ograve;ng)</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Total_Net_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&nbsp;</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">b. T&#7927; tr&#7885;ng thu nh&#7853;p t&#7915; n&ocirc;ng
-                        nghi&#7879;p</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">%</span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Agri_Income_Pct" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">2</span></p>
-            </td>
-            <td class="c17 c35" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Thu nh&#7853;p t&#7915; n&ocirc;ng nghi&#7879;p (thu nh&#7853;p
-                        r&ograve;ng)</span></p>
-            </td>
-            <td class="c17 c54" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Agri_Net_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="6">
-                <p class="c3"><span class="c1">&nbsp;</span></p>
-            </td>
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">a</span></p>
-            </td>
-            <td class="c17 c129" colspan="2" rowspan="1">
-                <p class="c41"><span class="c1">Thu t&#7915; tr&#7891;ng tr&#7885;t</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&nbsp;</span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Crop_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="4">
-                <p class="c3"><span class="c1">&nbsp;</span></p>
-            </td>
-            <td class="c18 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">1</span></p>
-            </td>
-            <td class="c44 c17" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">C&agrave; ph&ecirc;</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Cafe_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c18 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">2</span></p>
-            </td>
-            <td class="c44 c17" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">Tr&#7891;ng l&uacute;a</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Trong_lua" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c17 c18" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">3</span></p>
-            </td>
-            <td class="c44 c17" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">C&acirc;y &#259;n tr&aacute;i</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Cay_an_trai" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c18 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">4</span></p>
-            </td>
-            <td class="c44 c17" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">C&acirc;y tr&#7891;ng:
-                        &nbsp;<span id="Name_Income_other_tree"></span></span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Income_other_tree" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">b</span></p>
-            </td>
-            <td class="c129 c17" colspan="2" rowspan="1">
-                <p class="c41"><span class="c1">Thu t&#7915; th&#7911;y s&#7843;n</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Aqua_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&nbsp;</span></p>
-            </td>
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">c</span></p>
-            </td>
-            <td class="c129 c17" colspan="2" rowspan="1">
-                <p class="c7"><span class="c1">Thu t&#7915; ch&#259;n nu&ocirc;i kh&aacute;c</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Livestock_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">3</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Lao &#273;&#7897;ng th&#432;&#7901;ng xuy&ecirc;n (&#273;&#432;&#7907;c
-                        tr&#7843; l&#432;&#417;ng c&#7889; &#273;&#7883;nh h&agrave;ng th&aacute;ng)</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Salaried_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c17 c56" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">4</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Lao &#273;&#7897;ng th&#7901;i v&#7909; (tr&#7843; ti&#7873;n c&ocirc;ng
-                        theo theo gi&#7901;/ng&agrave;y/tu&#7847;n)</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Seasonal_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">5</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">T&#7921; kinh doanh</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Business_Income" class="c1"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c56 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">6</span></p>
-            </td>
-            <td class="c35 c17" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Kh&aacute;c</span></p>
-            </td>
-            <td class="c54 c17" colspan="1" rowspan="1">
-                <p class="c23"><span class="c1"></span></p>
-            </td>
-            <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span id="Other_Income" class="c1"></span></p>
-            </td>
-        </tr>
+        <tbody>
+            <tr class="c111">
+                <td class="c17 c132" colspan="6" rowspan="1">
+                    <p class="c83"><span class="c0">H&#7897; tham gia v&agrave;o nh&#7919;ng ho&#7841;t &#273;&#7897;ng
+                            s&#7843;n xu&#7845;t, kinh doanh t&#7841;o thu nh&#7853;p n&agrave;o</span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c12 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">&nbsp;TT</span></p>
+                </td>
+                <td class="c12 c17 c154" colspan="4" rowspan="1">
+                    <p class="c3"><span class="c0">&nbsp;N&#7897;i dung c&acirc;u h&#7887;i</span></p>
+                </td>
+                <td class="c14 c12 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">N&#259;m 2025</span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">1</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">a. T&#7893;ng thu nh&#7853;p c&#7911;a h&#7897; (thu nh&#7853;p
+                            r&ograve;ng)</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Total_Net_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">&nbsp;</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">b. T&#7927; tr&#7885;ng thu nh&#7853;p t&#7915; n&ocirc;ng
+                            nghi&#7879;p</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">%</span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Agri_Income_Pct" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">2</span></p>
+                </td>
+                <td class="c17 c35" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Thu nh&#7853;p t&#7915; n&ocirc;ng nghi&#7879;p (thu nh&#7853;p
+                            r&ograve;ng)</span></p>
+                </td>
+                <td class="c17 c54" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Agri_Net_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="6">
+                    <p class="c3"><span class="c1">&nbsp;</span></p>
+                </td>
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">a</span></p>
+                </td>
+                <td class="c17 c129" colspan="2" rowspan="1">
+                    <p class="c41"><span class="c1">Thu t&#7915; tr&#7891;ng tr&#7885;t</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">&nbsp;</span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Crop_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="4">
+                    <p class="c3"><span class="c1">&nbsp;</span></p>
+                </td>
+                <td class="c18 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">1</span></p>
+                </td>
+                <td class="c44 c17" colspan="1" rowspan="1">
+                    <p class="c7"><span class="c1">C&agrave; ph&ecirc;</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">Tri&#7879;u &#273;&#7891;ng</span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Cafe_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c18 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">2</span></p>
+                </td>
+                <td class="c44 c17" colspan="1" rowspan="1">
+                    <p class="c7"><span class="c1">Tr&#7891;ng l&uacute;a</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Trong_lua" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c17 c18" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">3</span></p>
+                </td>
+                <td class="c44 c17" colspan="1" rowspan="1">
+                    <p class="c7"><span class="c1">C&acirc;y &#259;n tr&aacute;i</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Cay_an_trai" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c18 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">4</span></p>
+                </td>
+                <td class="c44 c17" colspan="1" rowspan="1">
+                    <p class="c7"><span class="c1">C&acirc;y tr&#7891;ng:
+                            &nbsp;<span id="Name_Income_other_tree"></span></span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Income_other_tree" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">b</span></p>
+                </td>
+                <td class="c129 c17" colspan="2" rowspan="1">
+                    <p class="c41"><span class="c1">Thu t&#7915; th&#7911;y s&#7843;n</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Aqua_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">&nbsp;</span></p>
+                </td>
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">c</span></p>
+                </td>
+                <td class="c129 c17" colspan="2" rowspan="1">
+                    <p class="c7"><span class="c1">Thu t&#7915; ch&#259;n nu&ocirc;i kh&aacute;c</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Livestock_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">3</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Lao &#273;&#7897;ng th&#432;&#7901;ng xuy&ecirc;n
+                            (&#273;&#432;&#7907;c
+                            tr&#7843; l&#432;&#417;ng c&#7889; &#273;&#7883;nh h&agrave;ng th&aacute;ng)</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Salaried_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c17 c56" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">4</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Lao &#273;&#7897;ng th&#7901;i v&#7909; (tr&#7843; ti&#7873;n
+                            c&ocirc;ng
+                            theo theo gi&#7901;/ng&agrave;y/tu&#7847;n)</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Seasonal_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">5</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">T&#7921; kinh doanh</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Business_Income" class="c1"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c56 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c1">6</span></p>
+                </td>
+                <td class="c35 c17" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Kh&aacute;c</span></p>
+                </td>
+                <td class="c54 c17" colspan="1" rowspan="1">
+                    <p class="c23"><span class="c1"></span></p>
+                </td>
+                <td class="c14 c17" colspan="1" rowspan="1">
+                    <p class="c3"><span id="Other_Income" class="c1"></span></p>
+                </td>
+            </tr>
     </table>
     <p class="c83"><span class="c105 c67">&nbsp;</span>
-        <hr style="page-break-before:always;display:none;">
+        <hr class="c-page-break">
     </p>
     <p class="c83"><span class="c69">C. LAND TENURE &amp; FARMING SYSTEM</span></p>
     <table class="c60">
-        <tr class="c6">
-            <td class="c11 c12" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">TT</span></p>
-            </td>
-            <td class="c12 c53" colspan="2" rowspan="1">
-                <p class="c3"><span class="c0">N&#7897;i dung c&acirc;u h&#7887;i</span></p>
-            </td>
-            <td class="c103 c12" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">Tr&#7843; l&#7901;i</span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c11" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">1</span></p>
-            </td>
-            <td class="c53" colspan="2" rowspan="1">
-                <p class="c7"><span class="c1">T&#7893;ng di&#7879;n t&iacute;ch s&#7843;n xu&#7845;t c&agrave;
-                        ph&ecirc; c&#7911;a h&#7897; (Di&#7879;n t&iacute;ch &#273;&#7845;t c&oacute; tr&#7891;ng
-                        c&agrave; ph&ecirc;, bao g&#7891;m c&#7843; xen canh) (ha)</span></p>
-            </td>
-            <td class="c103" colspan="1" rowspan="1">
-                <p class="c3 c15"><span id="Total_Coffee_Area" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c11" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">2</span></p>
-            </td>
-            <td class="c53" colspan="2" rowspan="1">
-                <p class="c7"><span class="c1">S&#7889; m&#7843;nh tr&#7891;ng c&agrave; ph&ecirc;</span></p>
-            </td>
-            <td class="c103" colspan="1" rowspan="1">
-                <p class="c3 c15"><span id="Plot_Quantity" class="c0"></span></p>
-            </td>
-        </tr>
-        <tr class="c6">
-            <td class="c11" colspan="1" rowspan="1">
-                <p class="c3"><span class="c0">3</span></p>
-            </td>
-            <td class="c161" colspan="3" rowspan="1">
-                <p class="c7"><span class="c1">Thông tin chi tiết về đất đai sản xuất cà phê</span></p>
-            </td>
-        </tr>
+        <tbody>
+            <tr class="c6">
+                <td class="c11 c12" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">TT</span></p>
+                </td>
+                <td class="c12 c53" colspan="2" rowspan="1">
+                    <p class="c3"><span class="c0">N&#7897;i dung c&acirc;u h&#7887;i</span></p>
+                </td>
+                <td class="c103 c12" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">Tr&#7843; l&#7901;i</span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c11" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">1</span></p>
+                </td>
+                <td class="c53" colspan="2" rowspan="1">
+                    <p class="c7"><span class="c1">T&#7893;ng di&#7879;n t&iacute;ch s&#7843;n xu&#7845;t c&agrave;
+                            ph&ecirc; c&#7911;a h&#7897; (Di&#7879;n t&iacute;ch &#273;&#7845;t c&oacute; tr&#7891;ng
+                            c&agrave; ph&ecirc;, bao g&#7891;m c&#7843; xen canh) (ha)</span></p>
+                </td>
+                <td class="c103" colspan="1" rowspan="1">
+                    <p class="c3 c15"><span id="Total_Coffee_Area" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c11" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">2</span></p>
+                </td>
+                <td class="c53" colspan="2" rowspan="1">
+                    <p class="c7"><span class="c1">S&#7889; m&#7843;nh tr&#7891;ng c&agrave; ph&ecirc;</span></p>
+                </td>
+                <td class="c103" colspan="1" rowspan="1">
+                    <p class="c3 c15"><span id="Plot_Quantity" class="c0"></span></p>
+                </td>
+            </tr>
+            <tr class="c6">
+                <td class="c11" colspan="1" rowspan="1">
+                    <p class="c3"><span class="c0">3</span></p>
+                </td>
+                <td class="c161" colspan="3" rowspan="1">
+                    <p class="c7"><span class="c1">Thông tin chi tiết về đất đai sản xuất cà phê</span></p>
+                </td>
+            </tr>
     </table>
     <p class="c107 c39"><span class="c1"></span></p>
     <table class="c60">
@@ -3343,12 +3388,10 @@
         </tbody>
         <tr class="c6">
             <td class="c64" colspan="1" rowspan="1">
-                <p class="c3 c143"><span
-                        style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10pt;">&Sigma;</span></p>
+                <p class="c3 c143"><span class="c0">&Sigma;</span></p>
             </td>
             <td class="c65" colspan="1" rowspan="1">
-                <p class="c3"><span id="Total_Coffee_Area_Sum"
-                        style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10pt;"></span></p>
+                <p class="c3"><span id="Total_Coffee_Area_Sum" class="c0"></span></p>
             </td>
             <td class="c141" colspan="1" rowspan="1">
                 <p class="c3 c39"><span class="c0"></span></p>
@@ -3366,8 +3409,7 @@
                 <p class="c3 c39"><span class="c0"></span></p>
             </td>
             <td class="c34" colspan="1" rowspan="1">
-                <p class="c3"><span id="Total_Coffee_volume"
-                        style="font-family: 'Inter', sans-serif; font-weight: 700; font-size: 10pt;"></span></p>
+                <p class="c3"><span id="Total_Coffee_volume" class="c0"></span></p>
             </td>
             <td class="c66" colspan="1" rowspan="1">
                 <p class="c3 c39"><span class="c0"></span></p>
