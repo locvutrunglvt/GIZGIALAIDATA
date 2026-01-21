@@ -4906,13 +4906,8 @@
     </table>
 
     <p class="c8"><span class="c1"></span></p>
-    <div id="RELATED_IMAGES_SECTION" style="margin-top: 30px;">
-        <p class="c83" style="text-align: center;"><span class="c69">PHỤ LỤC HÌNH ẢNH (IMAGES)</span></p>
-        <div id="Related_Images_CONTAINER"
-            style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; border: 1px solid #d9d9d9; border-radius: 8px; background-color: #fcfcfc;">
-            <!-- Images will be injected here -->
-        </div>
-    </div> <!-- Dynamic Data Loading Script -->
+    <!-- REMOVED RELATED_IMAGES_SECTION FOR v3.9.2 -->
+    <!-- Dynamic Data Loading Script -->
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
 
@@ -4974,7 +4969,7 @@
                         const spans = row.querySelectorAll('span.c0');
                         if (spans.length >= 9) {
                             spans[0].innerText = i + 1;
-                            spans[1].innerText = m.Member_name || m['Tên'] || m['Full Name'] || '';
+                            spans[1].innerText = m.Member_name || m['Tên'] || m['Full Name'] || m['Name'] || '';
                             spans[2].innerText = m.Gender || m['Giới tính'] || '';
                             spans[3].innerText = m['Year of birth'] || m['Năm sinh'] || '';
                             spans[4].innerText = m.Ethnic || m['Dân tộc'] || m.Ethlic || '';
@@ -4999,20 +4994,21 @@
                         const row = templateRow.cloneNode(true);
                         const spans = row.querySelectorAll('span.c0');
                         if (spans.length >= 14) {
+                            const toLower = (val) => (val && typeof val === 'string') ? val.toLowerCase() : val;
                             spans[0].innerText = i + 1;
                             spans[1].innerText = p.Area_Ha || p['Diện tích (ha)'] || '';
                             spans[2].innerText = p['Forest area per plot'] || p['Diện tích đất rừng trên mảnh (ha)'] || '';
                             spans[3].innerText = p.Tree_Count || p['Số lượng gốc cà phê'] || '';
-                            spans[4].innerText = p.Intercropping_YN || p['Có trồng xen cây khác'] || '';
-                            spans[5].innerText = p.Tree_Intercropping || p['Cây trồng xen'] || '';
+                            spans[4].innerText = toLower(p.Intercropping_YN || p['Có trồng xen cây khác'] || '');
+                            spans[5].innerText = toLower(p.Tree_Intercropping || p['Cây trồng xen'] || '');
                             spans[6].innerText = p.Harvest_Area || p['Diện tích cho thu hoạch'] || '';
                             spans[7].innerText = p.Yield_2025 || p['Sản lượng năm 2025 (tấn)'] || '';
-                            spans[8].innerText = p.Ownership_Type || p['Hình thức sở hữu'] || '';
+                            spans[8].innerText = toLower(p.Ownership_Type || p['Hình thức sở hữu'] || '');
                             spans[9].innerText = p.Start_Year || p['Năm bắt đầu trồng'] || '';
                             spans[10].innerText = p.Recent_Year || p['Năm trồng cà phê gần nhất'] || '';
-                            spans[11].innerText = p.Previous_Crop || p['Cây trồng trước khi trồng'] || '';
+                            spans[11].innerText = toLower(p.Previous_Crop || p['Cây trồng trước khi trồng'] || '');
                             spans[12].innerText = p.Forest_Distance || p['Khoảng cách tới rừng gần nhất? (km)'] || '';
-                            spans[13].innerText = p.GPS_Mapped_YN || p['Đất của bạn đã được lập bản đồ địa lý chưa?'] || '';
+                            spans[13].innerText = toLower(p.GPS_Mapped_YN || p['Đất của bạn đã được lập bản đồ địa lý chưa?'] || '');
                         }
                         plotBody.appendChild(row);
                     });
@@ -5056,48 +5052,18 @@
             const mainImages = [data.Farmer_Photo, data.Photo, data.Image, data.Images].flat().filter(img => img);
             images = [...new Set([...mainImages, ...images])]; // Unique images
 
-            const containerTop = document.getElementById('Related_Images_CONTAINER_TOP');
-            const containerBottom = document.getElementById('Related_Images_CONTAINER');
             const farmerPhotoImg = document.getElementById('Farmer_Photo');
             const loadingText = document.getElementById('Image_Loading_Notice');
 
             if (images.length > 0) {
-                // Top Photo (Interviewee)
+                // Only Top Photo (Interviewee) in v3.9.2
                 if (farmerPhotoImg) {
                     farmerPhotoImg.src = images[0];
                     farmerPhotoImg.style.display = 'block';
                     if (loadingText) loadingText.style.display = 'none';
                 }
-
-                // Bottom Appendix
-                if (containerBottom) {
-                    containerBottom.innerHTML = '';
-                    images.forEach((imgUrl, idx) => {
-                        const wrapper = document.createElement('div');
-                        wrapper.style.textAlign = 'center';
-
-                        const img = document.createElement('img');
-                        img.src = imgUrl;
-                        img.style.maxWidth = '250px';
-                        img.style.maxHeight = '350px';
-                        img.style.border = '2px solid #38761d';
-                        img.style.borderRadius = '5px';
-                        img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-
-                        const label = document.createElement('p');
-                        label.innerText = `Ảnh ${idx + 1}`;
-                        label.style.fontSize = '9pt';
-                        label.style.marginTop = '5px';
-                        label.style.fontFamily = 'Inter, sans-serif';
-
-                        wrapper.appendChild(img);
-                        wrapper.appendChild(label);
-                        containerBottom.appendChild(wrapper);
-                    });
-                }
             } else {
-                if (loadingText) loadingText.innerText = 'Không có hình ảnh đính kèm.';
-                if (containerBottom) containerBottom.innerHTML = '<p style="color: #666; font-style: italic;">Không có hình ảnh đính kèm.</p>';
+                if (loadingText) loadingText.innerText = 'Không có hình ảnh chân dung.';
             }
         }
 
@@ -5115,6 +5081,8 @@
             }
 
             // 2. Multi-select mappings
+            data.Year_of_birth = data.Year_of_birth || data['Year of birth'] || data['Năm sinh'] || '';
+            data.Respondent_Name = data.Respondent_Name || data['Respondent Name'] || data['Người trả lời phỏng vấn'] || '';
             data.Loan_Source_Display = formatSelectOther(data.Loan_Source, data.Other_Source);
             data.Reason_Child_Yes_Display = formatSelectOther(data.Reason_Child_Yes, data.Other_yes_child_labour);
             data.Reason_Child_No_Display = formatSelectOther(data.Reason_Child_No, data.Other_no_child_labour);
