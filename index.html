@@ -1,461 +1,444 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
-    <title>Báo Cáo Khảo Sát Nông Hộ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Khảo sát Nông hộ Toàn diện - GIZ SAFE Coffee</title>
     <style>
-        @page { size: A4; margin: 1.5cm; }
-        body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.3; color: #000; }
-        
-        /* Cấu trúc bảng */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { border: 1px solid black; padding: 4px 6px; vertical-align: middle; }
-        .no-border { border: none; }
-        
-        /* Header styles */
-        .header-logos img { height: 60px; width: auto; }
-        h1, h2, h3 { text-align: left; margin: 5px 0; text-transform: uppercase; }
-        h1 { font-size: 14pt; font-weight: bold; color: #38761d; } /* Màu xanh tiêu đề */
-        h2 { font-size: 13pt; font-weight: bold; }
-        .report-title { font-size: 20pt; color: #b45f06; text-align: center; margin: 20px 0; font-weight: bold; }
-        
-        /* Section styles */
-        .section-header { background-color: #eee; font-weight: bold; padding: 5px; margin-top: 20px; border: 1px solid #000; color: #783f04; }
-        .sub-header { font-weight: bold; font-style: italic; margin-top: 10px; }
-        
-        /* Utility */
-        .text-center { text-align: center; }
-        .text-bold { font-weight: bold; }
-        .bg-gray { background-color: #f0f0f0; }
-        .loading { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; justify-content:center; align-items:center; z-index:99; font-size:18px;}
-        
-        /* In ấn */
-        @media print { 
-            .no-print { display: none; } 
-            table { page-break-inside: auto; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
+        /* CSS IN ẤN CHUẨN A4 */
+        @page {
+            size: A4;
+            margin: 1cm 1.5cm;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .container {
+                box-shadow: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11pt;
+            line-height: 1.3;
+            color: #333;
+            background-color: #eee;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 1.5cm 1.5cm;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        /* HEADER */
+        .academic-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 11pt;
+            line-height: 1.2;
+        }
+
+        .report-title {
+            text-align: center;
+            font-size: 18pt;
+            font-weight: bold;
+            color: #b45f06;
+            margin: 15px 0;
+            text-transform: uppercase;
+        }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            border: 1px solid black;
+            padding: 5px 8px;
+            vertical-align: middle;
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+            font-size: 10pt;
+        }
+
+        .section-title {
+            font-weight: bold;
+            background-color: #f7e1cc;
+            padding: 5px 10px;
+            margin-top: 20px;
+            border: 1px solid #000;
+            text-transform: uppercase;
+            font-size: 11pt;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .font-bold {
+            font-weight: bold;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        /* IMAGES */
+        .respondent-img {
+            max-width: 120px;
+            max-height: 140px;
+            border: 1px solid #ccc;
+            display: none;
+            margin: 5px auto;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .btn-print {
+            background: #b45f06;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
+
 <body>
 
-    <div id="loading" class="loading">⏳ Đang tải dữ liệu báo cáo...</div>
-    <div class="no-print" style="text-align:center; padding:10px; background:#eee;">
-        <button onclick="window.print()" style="padding:10px 20px; font-size:16px; cursor:pointer;">🖨️ IN BÁO CÁO</button>
+    <div class="toolbar no-print">
+        <button class="btn-print" onclick="window.print()">🖨️ XUẤT BÁO CÁO (PDF)</button>
     </div>
 
-    <table class="no-border">
-        <tr class="no-border">
-            <td class="no-border header-logos">
-                <img src="https://via.placeholder.com/800x100?text=LOGO+PLACEHOLDER" alt="Logos">
-            </td>
-        </tr>
-    </table>
+    <div class="container">
+        <!-- I. THÔNG TIN ĐỊNH DANH -->
+        <div class="academic-header">
+            HỌC VIỆN NÔNG NGHIỆP VIỆT NAM<br>
+            VIỆN KINH TẾ VÀ THỂ CHẾ NÔNG NGHIỆP<br>
+        </div>
 
-    <h1>HỌC VIỆN NÔNG NGHIỆP VIỆT NAM</h1>
-    <h2>VIỆN KINH TẾ VÀ THỂ CHẾ NÔNG NGHIỆP</h2>
-    <div class="report-title">BẢNG HỎI HỘ NÔNG DÂN</div>
+        <div class="report-title">BẢNG HỎI HỘ NÔNG DÂN</div>
 
-    <table>
-        <tr>
-            <td width="5%" class="text-center">1</td>
-            <td width="25%">Ngày phỏng vấn</td>
-            <td id="Interview_Date">...</td>
-            <td width="20%" rowspan="6" class="text-center" style="vertical-align: middle;">
-                <img id="Respondent_Image" src="" style="max-width:100%; max-height:150px; display:none;">
-                <br><em>Ảnh đại diện</em>
-            </td>
-        </tr>
-        <tr>
-            <td class="text-center">2</td>
-            <td>Tỉnh</td>
-            <td>Gia Lai</td>
-        </tr>
-        <tr>
-            <td class="text-center">4</td>
-            <td>Xã</td>
-            <td id="Commune">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">5</td>
-            <td>Thôn</td>
-            <td id="Village">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">6</td>
-            <td>Tên chủ hộ</td>
-            <td id="Owner_Name" class="text-bold">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">7</td>
-            <td>Số điện thoại</td>
-            <td id="Phone_Number">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">8</td>
-            <td>Người trả lời phỏng vấn</td>
-            <td colspan="2" id="Respondent_Info">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">9</td>
-            <td>Loại hình kinh tế của hộ</td>
-            <td colspan="2" id="Economic_Class">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">10</td>
-            <td>Hộ có tham gia HTX không?</td>
-            <td colspan="2" id="Coop_Member_YN">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">11</td>
-            <td>Số năm trồng cà phê</td>
-            <td colspan="2" id="Coffee_Years_Exp">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">12</td>
-            <td>Chuyển từ Cà phê -> Cây khác (5 năm)</td>
-            <td colspan="2" id="Switch_Out_Coffee">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">13</td>
-            <td>Chuyển từ Cây khác -> Cà phê (5 năm)</td>
-            <td colspan="2" id="Switch_In_Coffee">...</td>
-        </tr>
-    </table>
-
-    <div class="section-header">A. THÔNG TIN THÀNH VIÊN HỘ (HH MEMBERS)</div>
-    <table id="table-members">
-        <thead>
-            <tr class="bg-gray text-center">
-                <th>TT</th>
-                <th>Tên</th>
-                <th>Giới tính</th>
-                <th>Năm sinh</th>
-                <th>Dân tộc</th>
-                <th>Quan hệ</th>
-                <th>Học vấn</th>
-                <th>Tham gia SX?</th>
-                <th>Công đoạn</th>
+        <table>
+            <tr>
+                <td width="30">1</td>
+                <td width="150">Ngày phỏng vấn</td>
+                <td id="Interview_Date">...</td>
+                <td width="150" rowspan="6" class="text-center">
+                    <img id="Respondent_Image" class="respondent-img" src="">
+                    <div id="no-photo" style="font-size: 9pt; color: #999;">Ảnh đối tượng</div>
+                </td>
             </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div class="section-header">B. THU NHẬP GIA ĐÌNH (FAMILY INCOMES)</div>
-    <table>
-        <tr class="bg-gray text-center">
-            <th width="5%">TT</th>
-            <th colspan="2">Nội dung</th>
-            <th>Đơn vị</th>
-            <th>Năm 2025</th>
-        </tr>
-        <tr>
-            <td class="text-center">1</td>
-            <td colspan="2">a. Tổng thu nhập ròng</td>
-            <td class="text-center">Triệu đồng</td>
-            <td id="Total_Net_Income">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="2">b. Tỷ trọng thu nhập nông nghiệp</td>
-            <td class="text-center">%</td>
-            <td id="Agri_Income_Pct">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">2</td>
-            <td colspan="2" class="text-bold">Thu nhập từ nông nghiệp</td>
-            <td class="text-center">Triệu đồng</td>
-            <td id="Agri_Net_Income">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td width="5%">a</td>
-            <td>Thu từ trồng trọt</td>
-            <td></td>
-            <td id="Crop_Income">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td>1. Cà phê</td>
-            <td class="text-center">Triệu đồng</td>
-            <td id="Coffee_Income">...</td> </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td>2. Trồng lúa</td>
-            <td></td>
-            <td id="Rice_Income">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td>3. Cây ăn trái</td>
-            <td></td>
-            <td id="Fruit_Income">...</td>
-        </tr>
-         <tr>
-            <td></td>
-            <td class="text-center">b</td>
-            <td>Thu từ thủy sản</td>
-            <td></td>
-            <td id="Aqua_Income">...</td>
-        </tr>
-         <tr>
-            <td></td>
-            <td class="text-center">c</td>
-            <td>Thu từ chăn nuôi khác</td>
-            <td></td>
-            <td id="Livestock_Income">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">3</td>
-            <td colspan="2">Lao động thường xuyên</td>
-            <td></td>
-            <td id="Salaried_Income">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">4</td>
-            <td colspan="2">Lao động thời vụ</td>
-            <td></td>
-            <td id="Seasonal_Income">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">5</td>
-            <td colspan="2">Tự kinh doanh</td>
-            <td></td>
-            <td id="Business_Income">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">6</td>
-            <td colspan="2">Khác</td>
-            <td></td>
-            <td id="Other_Income">...</td>
-        </tr>
-    </table>
-
-    <div class="section-header">C. ĐẤT ĐAI & CANH TÁC (LAND TENURE)</div>
-    <table>
-        <tr>
-            <td width="5%" class="text-center">1</td>
-            <td>Tổng diện tích sản xuất cà phê (ha)</td>
-            <td id="Total_Coffee_Area">...</td>
-        </tr>
-        <tr>
-            <td class="text-center">2</td>
-            <td>Số mảnh trồng cà phê</td>
-            <td id="Plot_Quantity">...</td>
-        </tr>
-    </table>
-    
-    <div class="sub-header">Thông tin chi tiết các mảnh đất (Land Plots)</div>
-    <table id="table-plots" style="font-size: 10pt;">
-        <thead>
-            <tr class="bg-gray text-center">
-                <th>Mảnh</th>
-                <th>DT (ha)</th>
-                <th>DT Rừng</th>
-                <th>Số cây</th>
-                <th>Xen canh</th>
-                <th>Cây xen</th>
-                <th>Sở hữu</th>
-                <th>Năm trồng</th>
-                <th>Bản đồ GPS</th>
+            <tr>
+                <td>2</td>
+                <td>Tỉnh/Huyện</td>
+                <td id="Location_Admin">Gia Lai</td>
             </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div class="section-header">D. TÀI CHÍNH NÔNG NGHIỆP</div>
-    <table>
-        <tr>
-            <td width="5%">1</td>
-            <td>Nguồn vay vốn thường xuyên</td>
-            <td id="Loan_Source">...</td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td>Đánh giá điều kiện vay</td>
-            <td id="Loan_Rating">...</td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>Biết các chương trình hỗ trợ?</td>
-            <td id="Support_Prog_Aware">...</td>
-        </tr>
-        <tr>
-            <td>8</td>
-            <td>Nhu cầu vay vốn EUDR?</td>
-            <td id="Loan_need_EUDR">...</td>
-        </tr>
-    </table>
-
-    <div class="section-header">G. TRUY XUẤT NGUỒN GỐC (TRACEABILITY)</div>
-    <table>
-        <tr>
-            <td width="5%">1</td>
-            <td>Nghe nói đến TXNG?</td>
-            <td id="Trace_Aware_YN">...</td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td>Yêu cầu của bên mua:</td>
-            <td id="Buyer_Requirements">...</td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>Đã áp dụng chưa?</td>
-            <td id="Trace_Applied_YN">...</td>
-        </tr>
-        <tr>
-            <td>4</td>
-            <td>Mô tả hệ thống:</td>
-            <td id="Trace_System_Desc">...</td>
-        </tr>
-         <tr>
-            <td>6</td>
-            <td>Độ dễ áp dụng:</td>
-            <td id="Trace_Ease_Score">...</td>
-        </tr>
-        <tr>
-            <td>7</td>
-            <td>Rào cản/Khó khăn:</td>
-            <td id="Trace_Barriers">...</td>
-        </tr>
-    </table>
-
-    <div class="section-header">H. CANH TÁC BỀN VỮNG</div>
-    <table id="table-sustainable">
-        <thead>
-            <tr class="bg-gray text-center">
-                <th>TT</th>
-                <th>Phương thức/Chứng chỉ</th>
-                <th>Biết không?</th>
-                <th>Ai biết?</th>
-                <th>Hữu ích?</th>
-                <th>Thực hành?</th>
-                <th>Được chứng nhận?</th>
-                <th>Ai thực hành?</th>
+            <tr>
+                <td>4</td>
+                <td>Xã</td>
+                <td id="Commune">...</td>
             </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+            <tr>
+                <td>5</td>
+                <td>Thôn</td>
+                <td id="Village">...</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Tên chủ hộ</td>
+                <td id="Owner_Name" class="font-bold">...</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Số điện thoại</td>
+                <td id="Phone_Number">...</td>
+            </tr>
+        </table>
 
-    <div class="section-header">J. ĐÁNH GIÁ & NHU CẦU HỖ TRỢ</div>
-    <table>
-        <tr>
-            <td width="5%">1</td>
-            <td>Khó khăn lớn nhất (EUDR)</td>
-            <td id="EUDR_Max_Difficulty">...</td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td colspan="2" class="text-bold">Mong muốn hỗ trợ từ dự án SAFE:</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Pháp lý đất đai</td>
-            <td id="Land_Legal">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Truy xuất nguồn gốc</td>
-            <td id="Traceability_need">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Kỹ thuật canh tác</td>
-            <td id="Farm_Tech">...</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Kết nối doanh nghiệp</td>
-            <td id="Biz_Connect">...</td>
-        </tr>
-         <tr>
-            <td></td>
-            <td>Khác (Ghi rõ)</td>
-            <td id="Other_SAFE_Support_Wish">...</td>
-        </tr>
-    </table>
+        <!-- A. THÔNG TIN THÀNH VIÊN & THU NHẬP -->
+        <div class="section-title">A. THÔNG TIN THÀNH VIÊN & THU NHẬP</div>
+        <table>
+            <tr>
+                <th width="30">STT</th>
+                <th>Chỉ tiêu khảo sát</th>
+                <th width="150">Giá trị / Kết quả</th>
+            </tr>
+            <tr>
+                <td class="text-center">1</td>
+                <td>Tổng số nhân khẩu trong hộ</td>
+                <td id="Household_Size" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">2</td>
+                <td>Số lao động nông nghiệp chính</td>
+                <td id="Farm_Labor_Count" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">3</td>
+                <td>Tổng thu nhập hộ gia đình (triệu đồng/năm)</td>
+                <td id="Total_Net_Income" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">4</td>
+                <td>Thu nhập từ cây Cà phê (triệu đồng/năm)</td>
+                <td id="Coffee_Income" class="text-center">...</td>
+            </tr>
+        </table>
+
+        <!-- B. THÔNG TIN ĐẤT ĐAI & VƯỜN CÂY -->
+        <div class="section-title">B. THÔNG TIN ĐẤT ĐAI & VƯỜN CÂY</div>
+        <table id="table-plots">
+            <thead>
+                <tr>
+                    <th width="40">Mảnh</th>
+                    <th>Diện tích (ha)</th>
+                    <th>Số cây</th>
+                    <th>Năm trồng</th>
+                    <th>Giống cây</th>
+                    <th>Sản lượng dự kiến</th>
+                </tr>
+            </thead>
+            <tbody id="Plot_Data_Body">
+                <tr>
+                    <td colspan="6" class="text-center italic">Đang tải dữ liệu vườn...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- C. QUẢN LÝ ĐẦU VÀO (VẬT TƯ NÔNG NGHIỆP) -->
+        <div class="section-title">C. QUẢN LÝ ĐẦU VÀO (PHÂN BÓN & THUỐC BVTV)</div>
+        <table>
+            <tr>
+                <th width="30">STT</th>
+                <th>Loại vật tư / Câu hỏi</th>
+                <th width="200">Chi tiết sử dụng</th>
+            </tr>
+            <tr>
+                <td class="text-center">1</td>
+                <td>Có sử dụng phân bón hữu cơ/vi sinh không?</td>
+                <td id="Use_Organic_Fertilizer" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">2</td>
+                <td>Lượng phân hóa học sử dụng (kg/ha/năm)</td>
+                <td id="Chemical_Fertilizer_Qty" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">3</td>
+                <td>Số lần phun thuốc BVTV trung bình/năm</td>
+                <td id="Pesticide_Spray_Count" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">4</td>
+                <td>Người phun thuốc có mặc đồ bảo hộ không?</td>
+                <td id="Safety_Equipment_Used" class="text-center">...</td>
+            </tr>
+        </table>
+
+        <!-- D. THỰC HÀNH CANH TÁC & BỀN VỮNG -->
+        <div class="section-title">D. THỰC HÀNH CANH TÁC & BỀN VỮNG</div>
+        <table>
+            <tr>
+                <td width="50%">Thực hành trồng cây che bóng ( Shade trees)</td>
+                <td id="Shade_Trees_Practice">...</td>
+            </tr>
+            <tr>
+                <td>Phương pháp tưới (Tưới gốc/Tưới tiết kiệm)</td>
+                <td id="Irrigation_Method">...</td>
+            </tr>
+            <tr>
+                <td>Thực hiện cắt tỉa cành định kỳ (Pruning)</td>
+                <td id="Pruning_Practice">...</td>
+            </tr>
+            <tr>
+                <td>Quản lý cỏ dại (Phát cỏ/Phun thuốc)</td>
+                <td id="Weed_Management">...</td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div> <!-- Ngắt trang để sang trang 2 nếu cần -->
+
+        <!-- E. BIẾN ĐỔI KHÍ HẬU & NHÀ KÍNH (GHG) -->
+        <div class="section-title">E. BIẾN ĐỔI KHÍ HẬU & NHÀ KÍNH (GHG)</div>
+        <table>
+            <tr>
+                <td width="30">1</td>
+                <td>Thời tiết thay đổi có ảnh hưởng đến năng suất không?</td>
+                <td id="Climate_Impact_Status">...</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Các biện pháp ứng phó với hạn hán/sương muối</td>
+                <td id="Climate_Mitigation_Actions">...</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Có tham gia các chương trình giảm phát thải (Carbon)?</td>
+                <td id="Carbon_Program_Status">...</td>
+            </tr>
+        </table>
+
+        <!-- F. CHỨNG NHẬN & THỊ TRƯỜNG -->
+        <div class="section-title">F. CHỨNG NHẬN & THỊ TRƯỜNG</div>
+        <table>
+            <tr>
+                <th width="30">STT</th>
+                <th>Chứng nhận / Kênh tiêu thụ</th>
+                <th width="200">Thông tin chi tiết</th>
+            </tr>
+            <tr>
+                <td class="text-center">1</td>
+                <td>Các loại chứng nhận đang áp dụng (4C, RA, Organic...)</td>
+                <td id="Certifications_List" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">2</td>
+                <td>Kênh tiêu thụ chính (Đại lý/Hợp tác xã/Công ty)</td>
+                <td id="Market_Channel" class="text-center">...</td>
+            </tr>
+            <tr>
+                <td class="text-center">3</td>
+                <td>Giá bán trung bình niên vụ vừa qua (VNĐ/kg)</td>
+                <td id="Average_Selling_Price" class="text-center">...</td>
+            </tr>
+        </table>
+
+        <!-- G. XÃ HỘI, GIỚI & LAO ĐỘNG -->
+        <div class="section-title">G. XÃ HỘI, GIỚI & LAO ĐỘNG</div>
+        <table>
+            <tr>
+                <td>Ai là người ra quyết định chính trong sản xuất?</td>
+                <td id="Main_Decision_Maker">...</td>
+            </tr>
+            <tr>
+                <td>Có sử dụng lao động trẻ em dưới 15 tuổi không?</td>
+                <td id="Child_Labor_Status" class="font-bold">...</td>
+            </tr>
+            <tr>
+                <td>Khoảng cách từ nhà đến trường học/trạm y tế (km)</td>
+                <td id="Social_Services_Distance">...</td>
+            </tr>
+        </table>
+
+        <!-- H. ĐÀO TẠO & KIẾN NGHỊ -->
+        <div class="section-title">H. ĐÀO TẠO & KIẾN NGHỊ</div>
+        <table>
+            <tr height="60">
+                <td valign="top"><b>Nhu cầu đào tạo mong muốn:</b> <br> <span id="Training_Needs">...</span></td>
+            </tr>
+            <tr height="60">
+                <td valign="top"><b>Kiến nghị của hộ nông dân với dự án:</b> <br> <span
+                        id="Farmer_Suggestions">...</span></td>
+            </tr>
+        </table>
+
+        <!-- CHỮ KÝ XÁC NHẬN -->
+        <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+            <div style="text-align: center; width: 40%;">
+                <p class="font-bold">ĐẠI DIỆN HỘ GIA ĐÌNH</p>
+                <br><br><br>
+                <p>(Ký và ghi rõ họ tên)</p>
+            </div>
+            <div style="text-align: center; width: 40%;">
+                <p class="font-bold">ĐIỀU TRA VIÊN</p>
+                <br><br><br>
+                <p id="Staff_Name">(Ký và ghi rõ họ tên)</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center; font-size: 9pt; color: #777; font-style: italic;">
+            Báo cáo được trích xuất tự động từ hệ thống giám sát GIZ SAFE Coffee @ 2026.
+        </div>
+    </div>
 
     <script>
-        // --- CẤU HÌNH ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec"; 
-
-        async function loadData() {
+        function initReport() {
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            if (!id) { alert("Thiếu ID!"); return; }
 
-            try {
-                const res = await fetch(SCRIPT_URL + "?id=" + id);
-                const data = await res.json();
-                
-                if (data.error) { alert("Lỗi: " + data.error); return; }
-
-                // 1. ĐIỀN DỮ LIỆU ĐƠN (Tự động tìm ID trùng tên cột)
-                for (const key in data) {
-                    const el = document.getElementById(key);
-                    if (el) el.innerText = data[key];
+            // 1. Ánh xạ dữ liệu đơn lẻ (Duyệt qua tất cả ID có trong Document)
+            const allElements = document.querySelectorAll('[id]');
+            allElements.forEach(el => {
+                const value = params.get(el.id);
+                if (value !== null && value !== '') {
+                    if (el.tagName === 'IMG') {
+                        el.src = value;
+                        el.style.display = 'block';
+                        if (el.id === 'Respondent_Image') document.getElementById('no-photo').style.display = 'none';
+                    } else {
+                        el.innerText = value;
+                    }
                 }
-
-                // Xử lý riêng: Giới tính + Người trả lời (VD: Ông A, 1990)
-                if (data.Respondent_Name) {
-                    const prefix = data.Gender == 'Nam' ? 'Ông' : 'Bà'; // Lưu ý: 'Nam' phải khớp data raw
-                    document.getElementById('Respondent_Info').innerText = `${prefix} ${data.Respondent_Name}, ${data['Year of birth'] || ''}`;
-                }
-
-                // Xử lý Ảnh
-                if (data.Images) {
-                    // Xử lý link ảnh nếu cần (phụ thuộc AppSheet lưu ảnh thế nào)
-                    // document.getElementById('Respondent_Image').src = ... 
-                    // document.getElementById('Respondent_Image').style.display = 'block';
-                }
-
-                // 2. ĐIỀN BẢNG CON: HH MEMBERS
-                renderTable('table-members', data.HH_MEMBERS, [
-                    'TT', 'Member_name', 'Gender', 'Year of birth', 'Ethlic', 'Relatives', 'Study level', 'Pember participate in coffee production', 'Which stage of production'
-                ]);
-
-                // 3. ĐIỀN BẢNG CON: LAND PLOTS
-                renderTable('table-plots', data.LAND_PLOTS, [
-                    'TT', 'Area_Ha', 'Forest area per plot', 'Tree_Count', 'Intercropping_YN', 'Tree_Intercropping', 'Ownership_Type', 'Start_Year', 'GPS_Mapped_YN'
-                ]);
-
-                // 4. ĐIỀN BẢNG CON: SUSTAINABLE
-                renderTable('table-sustainable', data.SUSTAINABLE, [
-                    'TT', 'Certificate', 'Is_Known', 'Who_Knows_Most', 'Is_Beneficial', 'Is_Practiced', 'Is_Certified', 'Who_Practices'
-                ]);
-
-                document.getElementById('loading').style.display = 'none';
-
-            } catch (e) {
-                console.error(e);
-                alert("Lỗi kết nối: " + e.message);
-            }
-        }
-
-        // Hàm hỗ trợ vẽ bảng con
-        function renderTable(tableId, rowData, columns) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            tbody.innerHTML = "";
-            if (!rowData || rowData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${columns.length}" class="text-center">Không có dữ liệu</td></tr>`;
-                return;
-            }
-            rowData.forEach(row => {
-                let tr = "<tr>";
-                columns.forEach(col => {
-                    tr += `<td>${row[col] || ''}</td>`;
-                });
-                tr += "</tr>";
-                tbody.innerHTML += tr;
             });
+
+            // 2. Ánh xạ dữ liệu bảng (Plots)
+            const plotsRaw = params.get('Plots');
+            if (plotsRaw) {
+                try {
+                    const plots = JSON.parse(plotsRaw);
+                    const tbody = document.getElementById('Plot_Data_Body');
+                    if (plots && plots.length > 0) {
+                        tbody.innerHTML = '';
+                        plots.forEach(p => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td class="text-center">${p.TT || ''}</td>
+                                    <td class="text-center">${p.Area || ''}</td>
+                                    <td class="text-center">${p.Trees || ''}</td>
+                                    <td class="text-center">${p.Year || ''}</td>
+                                    <td class="text-center">${p.Variety || ''}</td>
+                                    <td class="text-center">${p.Yield || ''}</td>
+                                </tr>`;
+                        });
+                    }
+                } catch (e) { console.error("Error parsing plots data", e); }
+            }
         }
-
-        loadData();
+        window.onload = initReport;
     </script>
-
 </body>
+
 </html>
