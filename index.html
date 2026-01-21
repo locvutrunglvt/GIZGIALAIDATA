@@ -4938,6 +4938,256 @@
         </tr>
     </table>
     <p class="c8"><span class="c1"></span></p>
+    <!-- Dynamic Data Loading Script -->
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
+
+        async function loadData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const farmerId = urlParams.get('id');
+
+            if (!farmerId) {
+                console.log('No Farmer ID provided in URL');
+                // Even without ID, we can try to map direct URL parameters
+                mapUrlParams();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?id=${farmerId}`);
+                const data = await response.json();
+                console.log('Fetched Data:', data);
+
+                if (data) {
+                    // 1. Process Dynamic Tables (e.g., LAND_PLOTS)
+                    processTables(data);
+
+                    // 2. Global variable replacement
+                    replaceAllPlaceholders(document.body, data);
+
+                    // 3. Map URL params as overrides
+                    mapUrlParams();
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                mapUrlParams();
+            }
+        }
+
+        function replaceAllPlaceholders(element, data) {
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            const nodesToReplace = [];
+            while (node = walker.nextNode()) {
+                if (node.nodeValue.includes('<<')) {
+                    nodesToReplace.push(node);
+                }
+            }
+
+            nodesToReplace.forEach(textNode => {
+                let text = textNode.nodeValue;
+                const regex = /<<([^>]+)>>/g;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    const fullMatch = match[0];
+                    const expression = match[1].trim();
+
+                    // Extract key from [ColumnName], LOOKUP(..., [ColumnName], ...), IF(..., [ColumnName], ...), etc.
+                    let key = expression;
+                    const keyMatch = expression.match(/\[([^\]]+)\]/);
+                    if (keyMatch) {
+                        key = keyMatch[1];
+                    }
+
+                    // Get value from data
+                    let value = data[key] !== undefined ? data[key] : '';
+
+                    // Handle list/array values (often from SELECT or multiple images)
+                    if (Array.isArray(value)) {
+                        value = value.join(', ');
+                    }
+
+                    // Handle Images: if value looks like a URL and key contains Photo/Image/Images
+                    const isImageUrl = typeof value === 'string' && (value.startsWith('http') || value.startsWith('https') || value.startsWith('data:image'));
+                    const isImageKey = /photo|image/i.test(key);
+
+                    if (isImageUrl && isImageKey) {
+                        // Create an image element if it doesn't exist or replace text with img tag
+                        // Since we are in a text node, we might need to replace the node with a fragment
+                        const img = document.createElement('img');
+                        img.src = value;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '200px';
+                        img.style.display = 'block';
+                        img.style.margin = '5px auto';
+
+                        // We have to be careful about replacing text nodes with elements
+                        // This might break the loop if not handled correctly
+                        // For simplicity, we'll use a placeholder and replace later or just use innerHTML (carefully)
+                        const placeholder = `__IMG_LATENT_${Math.random()}__`;
+                        text = text.replace(fullMatch, placeholder);
+                        setTimeout(() => {
+                            document.body.innerHTML = document.body.innerHTML.replace(placeholder, img.outerHTML);
+                        }, 0);
+                    } else {
+                        text = text.replace(fullMatch, value);
+                    }
+                }
+                textNode.nodeValue = text;
+            });
+        }
+
+        function processTables(data) {
+            // Find all Start: placeholders
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            const startNodes = [];
+            while (node = walker.nextNode()) {
+                if (node.nodeValue.includes('<<Start:')) {
+                    startNodes.push(node);
+                }
+            }
+
+            startNodes.forEach(startNode => {
+                const text = startNode.nodeValue;
+                const match = text.match(/<<Start:\s*\[([^\]]+)\]>>/);
+                if (!match) return;
+
+                const listKey = match[1].replace('Related ', '').replace('s', ''); // Standard AppSheet naming
+                const tableData = data[listKey] || data['LAND_PLOTS'] || []; // Fallback to LAND_PLOTS for this specific template
+
+                // Find the row containing this start node
+                let startRow = startNode.parentElement;
+                while (startRow && startRow.tagName !== 'TR') {
+                    startRow = startRow.parentElement;
+                }
+                if (!startRow) return;
+
+                const parentTable = startRow.parentElement;
+
+                // Find the end node and row
+                let endNode = null;
+                let currentRow = startRow;
+                let tableRows = [startRow];
+
+                // This is a simple implementation assuming End is in the same or next few rows
+                // Real implementation would be more complex to handle multi-row blocks
+                const endWalker = document.createTreeWalker(parentTable, NodeFilter.SHOW_TEXT, null, false);
+                endWalker.currentNode = startNode;
+                while (node = endWalker.nextNode()) {
+                    if (node.nodeValue.includes('<<End>>')) {
+                        endNode = node;
+                        break;
+                    }
+                }
+
+                if (endNode) {
+                    let endRow = endNode.parentElement;
+                    while (endRow && endRow.tagName !== 'TR') {
+                        endRow = endRow.parentElement;
+                    }
+
+                    // Collect all rows between start and end (inclusive)
+                    let sibling = startRow.nextElementSibling;
+                    while (sibling && sibling !== endRow.nextElementSibling) {
+                        tableRows.push(sibling);
+                        sibling = sibling.nextElementSibling;
+                    }
+                }
+
+                // Remove the original template rows
+                tableRows.forEach(row => row.remove());
+
+                // For each item in data, clone and replace
+                tableData.forEach((item, index) => {
+                    tableRows.forEach(rowTemplate => {
+                        const newRow = rowTemplate.cloneNode(true);
+                        // Add index/TT if needed
+                        if (!item['TT']) item['TT'] = index + 1;
+
+                        // Clean up the Start/End markers in the clones
+                        newRow.innerHTML = newRow.innerHTML.replace(/<<Start:[^>]+>>/g, '').replace(/<<End>>/g, '');
+
+                        // Replace placeholders in this row
+                        replaceAllPlaceholders(newRow, item);
+                        parentTable.appendChild(newRow);
+                    });
+                });
+            });
+        }
+
+        function mapUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.forEach((value, key) => {
+                // If there's an element with ID matching the key, fill it
+                const el = document.getElementById(key);
+                if (el) {
+                    if (el.tagName === 'IMG') {
+                        el.src = value;
+                    } else {
+                        el.innerText = value;
+                    }
+                }
+
+                // Also try replacing any remaining placeholders that match this key
+                const regex = new RegExp(`<<\\[${key}\\]>>`, 'g');
+                document.body.innerHTML = document.body.innerHTML.replace(regex, value);
+            });
+        }
+
+        window.onload = loadData;
+    </script>
+
+    <!-- Floating Print Button -->
+    <div id="print-button-container"
+        style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; transition: all 0.3s ease;">
+        <button onclick="window.print()"
+            style="background: #b45f06; color: white; border: none; padding: 12px 24px; border-radius: 50px; cursor: pointer; font-family: Arial, sans-serif; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
+                <path
+                    d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z" />
+            </svg>
+            Xuất Báo Cáo (PDF)
+        </button>
+    </div>
+
+    <style>
+        @media print {
+            #print-button-container {
+                display: none !important;
+            }
+
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .c139 {
+                padding: 1.5cm !important;
+                max-width: none !important;
+                width: auto !important;
+            }
+        }
+
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #b45f06;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #783f04;
+        }
+    </style>
 </body>
 
 </html>
