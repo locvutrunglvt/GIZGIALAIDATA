@@ -2681,11 +2681,13 @@
     <div id="print-button-container" class="no-print">
         <button type="button" class="btn-print" onclick="window.print()">🖨️ XUẤT BÁO CÁO (PDF)</button>
     </div>
-    <h1 class="c33 c71"><span
-            style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 377.30px; height: 61.48px;"><img
-                alt="" src="images/image1.jpg"
-                style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
-                title=""></span></h1>
+    <h1 class="c33 c71">
+        <span
+            style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; width: 377.30px; height: 61.48px;">
+            <img alt="Logo" src="https://raw.githubusercontent.com/locvutrunglvt/GIZGIALAIDATA/refs/heads/main/Logo.jpg"
+                style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px;" title="Logo GIZ">
+        </span>
+    </h1>
     <h2 class="c3 c71"><span class="c93">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</span></h2>
     <h2 class="c3 c71"><span class="c93">VI&#7878;N KINH T&#7870; V&Agrave; TH&#7874; CH&#7870; N&Ocirc;NG
             NGHI&#7878;P</span></h2>
@@ -4951,7 +4953,15 @@
         }
 
         function processImages(data) {
-            const images = data['Related Images'] || data.Images || [];
+            // Lấy ảnh từ mảng con "Related Images" hoặc thuộc tính "Images" của bản ghi chính
+            let images = [];
+            if (data['Related Images'] && Array.isArray(data['Related Images'])) {
+                images = data['Related Images'].map(item => item.Images || item.Image).filter(img => img);
+            }
+            if (images.length === 0) {
+                images = data['Related Images'] || data.Images || [];
+            }
+
             const containers = ['Related_Images_CONTAINER', 'Related_Images_CONTAINER_TOP'];
 
             containers.forEach(id => {
