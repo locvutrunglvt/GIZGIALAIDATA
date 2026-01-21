@@ -2716,7 +2716,7 @@
             <td class="c48 c17" colspan="1" rowspan="1">
                 <p class="c41"><span class="c0">&nbsp;Gia Lai</span></p>
             </td>
-            <td id="Related_Images_CONTAINER" class="c17 c162" colspan="2" rowspan="5">
+            <td id="Related_Images_CONTAINER_TOP" class="c17 c162" colspan="2" rowspan="5">
                 <p style="color: #666; font-style: italic;">Đang tải hình ảnh...</p>
             </td>
         </tr>
@@ -4843,7 +4843,6 @@
                 if (data) {
                     // 1. Calculate Custom Fields (Calculated Fields)
                     applyCalculatedFields(data);
-
                     processTables(data);
                     processImages(data);
 
@@ -4859,7 +4858,7 @@
                             }
                         }
                     }
-                    mapUrlParams();
+                    // Do NOT call mapUrlParams here to prevent raw IDs from URL overwriting API labels
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -5027,11 +5026,21 @@
             data.Oral_contract = data['Oral contract'] || '';
             data.Written_contract = data['Written contract'] || '';
             data.Cafe_Income = data['Cà phê'] || '';
+            data.Total_Net_Income = data['Tổng thu nhập của hộ (thu nhập ròng)'] || data.Total_Net_Income || '';
+            data.Agri_Income_Pct = data['Tỷ trọng thu nhập từ nông nghiệp'] || data.Agri_Income_Pct || '';
             data.Total_Coffee_Area_Sum = data.Total_Coffee_Area || '';
 
             // 3. Field mappings (Vietnamese keys to ID friendly)
             data.Trong_lua = data['Trồng lúa'] || data.Trong_lua || '';
             data.Cay_an_trai = data['Cây ăn trái'] || data.Cay_an_trai || '';
+            data.Income_other_tree = data['Cây trồng khác'] || '';
+            data.Name_Income_other_tree = data['Which other tree'] || '';
+            data.Aqua_Income = data['Thu từ thủy sản'] || '';
+            data.Livestock_Income = data['Thu từ chăn nuôi khác'] || '';
+            data.Salaried_Income = data['Lao động thường xuyên (được trả lương cố định hàng tháng)'] || '';
+            data.Seasonal_Income = data['Lao động thời vụ (trả tiền công theo theo giờ/ngày/tuần)'] || '';
+            data.Business_Income = data['Tự kinh doanh'] || '';
+            data.Other_Income = data['Khác'] || '';
             data.Farming_information = data['Farming information'] || data.Farming_information || '';
         }
 
