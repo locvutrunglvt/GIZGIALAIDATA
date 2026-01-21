@@ -2703,9 +2703,11 @@
             <td class="c17 c119" colspan="2" rowspan="1">
                 <p class="c41"><span id="Interview_Date" class="c0"></span></p>
             </td>
-            <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&#7842;nh ng&#432;&#7901;i &#273;&#432;&#7907;c</span></p>
-                <p class="c3"><span class="c1">ph&#7887;ng v&#7845;n</span></p>
+            <td class="c20 c17" colspan="1" rowspan="1" style="text-align: center; vertical-align: middle;">
+                <p class="c3"><span class="c1">&#7843;nh ng&#432;&#7901;i &#273;&#432;&#7907;c ph&#7887;ng
+                        v&#7845;n</span></p>
+                <img id="Farmer_Photo" src=""
+                    style="max-width: 120px; max-height: 150px; display: none; margin: 5px auto; border: 1px solid #ccc; border-radius: 4px;">
             </td>
         </tr>
         <tr class="c120">
@@ -5056,6 +5058,9 @@
             data.Business_Income = data['Tự kinh doanh'] || '';
             data.Other_Income = data['Khác'] || '';
             data.Farming_information = data['Farming information'] || data.Farming_information || '';
+
+            // 4. Photo mapping (Representative photo)
+            data.Farmer_Photo = data.Photo || data['Ảnh đại diện'] || data['Representative Photo'] || data.Farmer_Photo || '';
         }
 
         function mapUrlParams() {
