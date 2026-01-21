@@ -5060,7 +5060,8 @@
             data.Farming_information = data['Farming information'] || data.Farming_information || '';
 
             // 4. Photo mapping (Representative photo)
-            data.Farmer_Photo = data.Photo || data['Ảnh đại diện'] || data['Representative Photo'] || data.Farmer_Photo || '';
+            // Ưu tiên Farmer_Photo từ API (đã là link Drive chuẩn)
+            data.Farmer_Photo = data.Farmer_Photo || data.Photo || data['Ảnh đại diện'] || data['Representative Photo'] || '';
         }
 
         function mapUrlParams() {
