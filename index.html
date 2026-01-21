@@ -2773,10 +2773,8 @@
                 <p class="c7"><span class="c1">Ng&#432;&#7901;i tr&#7843; l&#7901;i ph&#7887;ng v&#7845;n</span></p>
             </td>
             <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c67">&nbsp;</span><span class="c76">&lt;&lt;IF(LOOKUP(TEXT([Gender]),
-                        &quot;dropdown&quot;, &quot;drop_ID&quot;, &quot;label&quot;) = &quot;Nam&quot;,
-                        &quot;&Ocirc;ng&quot;, &quot;B&agrave;&quot;)&gt;&gt; &lt;&lt;[Respondent_Name]&gt;&gt;,
-                        &lt;&lt;[Year of birth]&gt;&gt;</span></p>
+                <p class="c3"><span id="Gender_Title" class="c76"></span> <span id="Respondent_Name"
+                        class="c76"></span>, <span id="Year_of_birth" class="c76"></span></p>
             </td>
         </tr>
         <tr class="c70">
@@ -2826,8 +2824,7 @@
                         kh&ocirc;ng? &nbsp;</span></p>
             </td>
             <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span
-                        class="c1">&lt;&lt;lookup([Switch_Out_Coffee],dropdown,drop_ID,label)&gt;&gt;</span></p>
+                <p class="c33"><span id="Switch_Out_Coffee" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c70">
@@ -2840,7 +2837,7 @@
                         ph&ecirc; kh&ocirc;ng? &nbsp;</span></p>
             </td>
             <td class="c20 c17" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">&lt;&lt;lookup([Switch_In_Coffee],dropdown,drop_ID,label)&gt;&gt;</span>
+                <p class="c33"><span id="Switch_In_Coffee" class="c1"></span>
                 </p>
             </td>
         </tr>
@@ -3006,8 +3003,7 @@
                 <p class="c23"><span class="c1"></span></p>
             </td>
             <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;LOOKUP(TEXT([Tr&#7891;ng l&uacute;a]), &quot;dropdown&quot;,
-                        &quot;drop_id&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3"><span id="Trong_lua" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -3021,8 +3017,7 @@
                 <p class="c23"><span class="c1"></span></p>
             </td>
             <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;LOOKUP(TEXT([C&acirc;y &#259;n tr&aacute;i]),
-                        &quot;dropdown&quot;, &quot;drop_id&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3"><span id="Cay_an_trai" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -3031,7 +3026,7 @@
             </td>
             <td class="c44 c17" colspan="1" rowspan="1">
                 <p class="c7"><span class="c1">C&acirc;y tr&#7891;ng:
-                        &nbsp;&lt;&lt;[Name_Income_other_tree]&gt;&gt;</span></p>
+                        &nbsp;<span id="Name_Income_other_tree"></span></span></p>
             </td>
             <td class="c54 c17" colspan="1" rowspan="1">
                 <p class="c23"><span class="c1"></span></p>
@@ -3102,8 +3097,7 @@
                 <p class="c23"><span class="c1"></span></p>
             </td>
             <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;LOOKUP(TEXT([Seasonal_Income]), &quot;dropdown&quot;,
-                        &quot;drop_id&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3"><span id="Seasonal_Income" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -3117,8 +3111,7 @@
                 <p class="c23"><span class="c1"></span></p>
             </td>
             <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;LOOKUP(TEXT([Business_Income]), &quot;dropdown&quot;,
-                        &quot;drop_id&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3"><span id="Business_Income" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -3132,8 +3125,7 @@
                 <p class="c23"><span class="c1"></span></p>
             </td>
             <td class="c14 c17" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;LOOKUP(TEXT([Other_Income]), &quot;dropdown&quot;,
-                        &quot;drop_id&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3"><span id="Other_Income" class="c1"></span></p>
             </td>
         </tr>
     </table>
@@ -3353,8 +3345,7 @@
                         kh&ocirc;ng?</span></p>
             </td>
             <td class="c103" colspan="1" rowspan="1">
-                <p class="c33"><span
-                        class="c1">&lt;&lt;lookup([Conflict_land_use_right],dropdown,Drop_ID,label)&gt;&gt;</span></p>
+                <p class="c33"><span id="Conflict_land_use_right" class="c1"></span></p>
             </td>
         </tr>
     </table>
@@ -3383,8 +3374,7 @@
                         ngu&#7891;n n&agrave;o?</span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c3"><span class="c1">&lt;&lt;SELECT(dropdown[label], IN([Drop_ID],
-                        [Loan_Source]))&gt;&gt;,&lt;&lt;[Other_Source]&gt;&gt;</span></p>
+                <p class="c3"><span id="Loan_Source_Display" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -3399,7 +3389,7 @@
                         nh&#432; th&#7871; n&agrave;o? </span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c33"><span class="c1">&lt;&lt;lookup([Loan_Rating],dropdown,Drop_ID,label)&gt;&gt;</span></p>
+                <p class="c33"><span id="Loan_Rating" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -3414,8 +3404,7 @@
                         ch&iacute;nh s&aacute;ch,&hellip;) ch&#432;a? </span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">&lt;&lt;LOOKUP(TEXT([Support_Prog_Aware]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c7"><span id="Support_Prog_Aware" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -3429,8 +3418,7 @@
                         xu&#7845;t n&ocirc;ng nghi&#7879;p ch&#432;a?</span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">&lt;&lt;LOOKUP(TEXT([Fin_Guide_YN]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c7"><span id="Fin_Guide_YN" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -3442,8 +3430,7 @@
                         v&#7889;n cho s&#7843;n xu&#7845;t n&ocirc;ng nghi&#7879;p ch&#432;a? </span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">&lt;&lt;LOOKUP(TEXT([Approach_Loan_Source_Agri]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c7"><span id="Approach_Loan_Source_Agri" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -3456,8 +3443,7 @@
                         n&agrave;o? </span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">&lt;&lt;LOOKUP(TEXT([Loan_Usage]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c7"><span id="Loan_Usage" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c42">
@@ -4810,10 +4796,7 @@
                         v&#7921;c? </span></p>
             </td>
             <td class="c47" colspan="1" rowspan="1">
-                <p class="c7"><span class="c1">&lt;&lt;TEXT(SELECT(dropdown[label], IN([Drop_ID],
-                        [_THISROW].[Deforestation_Causes])))&gt;&gt;
-                        &lt;&lt;IF(ISNOTBLANK([Other_Deforestation_Causes]), CONCATENATE(&quot;- &quot;,
-                        [Other_Deforestation_Causes]), &quot;&quot;)&gt;&gt;</span></p>
+                <p class="c7"><span id="Deforestation_Causes_Display" class="c1"></span></p>
             </td>
         </tr>
     </table>
@@ -4841,8 +4824,7 @@
                 <p class="c7 c39"><span class="c1"></span></p>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([EUDR_Max_Difficulty]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="EUDR_Max_Difficulty" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4868,8 +4850,7 @@
                 </ol>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([Land_Legal]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Land_Legal" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4882,8 +4863,7 @@
                 </ol>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([Traceability_need]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Traceability_need" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4896,8 +4876,7 @@
                 </ol>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([Farm_Tech]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Farm_Tech" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4910,8 +4889,7 @@
                 </ol>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([Biz_Connect]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Biz_Connect" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4924,8 +4902,7 @@
                 </ol>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;LOOKUP(TEXT([Other_SAFE_Support_Wish]), &quot;dropdown&quot;,
-                        &quot;Drop_ID&quot;, &quot;label&quot;)&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Other_SAFE_Support_Wish" class="c1"></span></p>
             </td>
         </tr>
         <tr class="c6">
@@ -4936,10 +4913,17 @@
                 <p class="c41 c116"><span class="c1">Th&ocirc;ng tin ghi r&otilde;:</span></p>
             </td>
             <td class="c108" colspan="1" rowspan="1">
-                <p class="c3 c15"><span class="c1">&lt;&lt;[Other_SAFE_Support_Wish_notes]&gt;&gt;</span></p>
+                <p class="c3 c15"><span id="Other_SAFE_Support_Wish_notes" class="c1"></span></p>
             </td>
         </tr>
     </table>
+    <div id="RELATED_IMAGES_SECTION" style="margin-top: 30px;">
+        <p class="c83"><span class="c69">PHỤ LỤC HÌNH ẢNH (IMAGES)</span></p>
+        <div id="Related_Images_CONTAINER"
+            style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; padding: 20px; border: 1px solid #d9d9d9; border-radius: 8px;">
+            <!-- Images will be injected here -->
+        </div>
+    </div>
     <p class="c8"><span class="c1"></span></p>
     <!-- Dynamic Data Loading Script -->
     <script>
@@ -4961,7 +4945,12 @@
                 console.log('Fetched Data:', data);
 
                 if (data) {
+                    // 1. Calculate Custom Fields (Calculated Fields)
+                    applyCalculatedFields(data);
+
                     processTables(data);
+                    processImages(data);
+
                     // Fill all elements by ID matching data keys
                     for (const key in data) {
                         const el = document.getElementById(key);
@@ -5039,6 +5028,54 @@
                     });
                 }
             }
+        }
+
+        function processImages(data) {
+            const images = data['Related Images'] || data.Images || [];
+            const container = document.getElementById('Related_Images_CONTAINER');
+            if (container && images.length > 0) {
+                container.innerHTML = '';
+                images.forEach(imgUrl => {
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    img.style.maxWidth = '250px';
+                    img.style.border = '2px solid #38761d';
+                    img.style.borderRadius = '5px';
+                    img.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                    container.appendChild(img);
+                });
+            } else if (container) {
+                container.innerHTML = '<p style="color: #666; font-style: italic;">Không có hình ảnh đính kèm.</p>';
+            }
+        }
+
+        function applyCalculatedFields(data) {
+            // 1. Gender Title
+            if (data.Gender) {
+                data.Gender_Title = (data.Gender === 'Nam' || data.Gender === 'Male') ? 'Ông' : 'Bà';
+            }
+
+            // 2. Loan Source Display (SELECT + Other)
+            const loanSources = data.Loan_Source || '';
+            const otherSource = data.Other_Source || '';
+            let loanDisplay = loanSources;
+            if (otherSource) {
+                loanDisplay = loanDisplay ? `${loanDisplay}, ${otherSource}` : otherSource;
+            }
+            data.Loan_Source_Display = loanDisplay;
+
+            // 3. Trong lua & Cay an trai
+            data.Trong_lua = data['Trồng lúa'] || data.Trong_lua || '';
+            data.Cay_an_trai = data['Cây ăn trái'] || data.Cay_an_trai || '';
+
+            // 4. Deforestation Causes (SELECT + Other)
+            const defCause = data.Deforestation_Causes || '';
+            const otherDef = data.Other_Deforestation_Causes || '';
+            let defDisplay = defCause;
+            if (otherDef) {
+                defDisplay = defDisplay ? `${defDisplay}, ${otherDef}` : otherDef;
+            }
+            data.Deforestation_Causes_Display = defDisplay;
         }
 
         function mapUrlParams() {
