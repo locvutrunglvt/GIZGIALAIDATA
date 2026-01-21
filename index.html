@@ -4987,26 +4987,47 @@
             const members = data['Related HH_members'] || data.HH_members || data.Members || [];
             const memberBody = document.getElementById('HH_members_BODY');
             if (memberBody && members.length > 0) {
-                const templateRow = memberBody.querySelector('tr');
-                if (templateRow) {
-                    memberBody.innerHTML = '';
-                    members.forEach((m, i) => {
-                        const row = templateRow.cloneNode(true);
-                        const spans = row.querySelectorAll('span.c1');
-                        if (spans.length >= 9) {
-                            spans[0].innerText = m.TT || i + 1;
-                            spans[1].innerText = m.Member_name || m['Tên'] || m['Full Name'] || m['Name'] || '';
-                            spans[2].innerText = m.Gender || m['Giới tính'] || '';
-                            spans[3].innerText = m['Year of birth'] || m['Năm sinh'] || '';
-                            spans[4].innerText = m.Ethnic || m.Ethlic || m['Dân tộc'] || '';
-                            spans[5].innerText = m.Relatives || m['Quan hệ với chủ hộ'] || '';
-                            spans[6].innerText = m['Study level'] || m['Học vấn cao nhất'] || '';
-                            spans[7].innerText = m['Pember participate in coffee production'] || m.Participate || m['Thành viên có tham gia sản xuất cà phê không?'] || '';
-                            spans[8].innerText = m['Which stage of production'] || m.Stage || m['Tham gia công đoạn nào'] || '';
-                        }
-                        memberBody.appendChild(row);
+                memberBody.innerHTML = ''; // Clear existing content
+                members.forEach((m, i) => {
+                    const row = document.createElement('tr');
+                    row.className = 'c6';
+
+                    // Create cells with proper IDs and values
+                    const cells = [
+                        { id: 'TT', value: m.TT || i + 1 },
+                        { id: 'Member_name', value: m.Member_name || m['Tên'] || m['Full Name'] || m['Name'] || '' },
+                        { id: 'Gender', value: transformValue(m.Gender || m['Giới tính'] || '', 'dropdown') },
+                        { id: 'Member_year_of_birth', value: m['Year of birth'] || m['Năm sinh'] || '' },
+                        { id: 'Ethnic', value: transformValue(m.Ethnic || m.Ethlic || m['Dân tộc'] || '', 'dropdown') },
+                        { id: 'Relatives', value: transformValue(m.Relatives || m['Quan hệ với chủ hộ'] || '', 'dropdown') },
+                        { id: 'Study_level', value: transformValue(m['Study level'] || m['Học vấn cao nhất'] || '', 'dropdown') },
+                        { id: 'Member_participate_coffee', value: transformValue(m['Pember participate in coffee production'] || m.Participate || m['Thành viên có tham gia sản xuất cà phê không?'] || '', 'dropdown') },
+                        { id: 'Which_stage_production', value: transformValue(m['Which stage of production'] || m.Stage || m['Tham gia công đoạn nào'] || '', 'dropdown') }
+                    ];
+
+                    const colClasses = ['c17 c130', 'c17 c149', 'c17 c104', 'c17 c142', 'c17 c45', 'c17 c163', 'c17 c151', 'c17 c164', 'c17 c152'];
+
+                    cells.forEach((cell, idx) => {
+                        const td = document.createElement('td');
+                        td.className = colClasses[idx];
+                        td.setAttribute('colspan', '1');
+                        td.setAttribute('rowspan', '1');
+
+                        const p = document.createElement('p');
+                        p.className = 'c3';
+
+                        const span = document.createElement('span');
+                        span.id = cell.id;
+                        span.className = 'c1';
+                        span.innerText = cell.value;
+
+                        p.appendChild(span);
+                        td.appendChild(p);
+                        row.appendChild(td);
                     });
-                }
+
+                    memberBody.appendChild(row);
+                });
             }
 
             // 2. Process LAND_PLOTS
