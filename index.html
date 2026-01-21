@@ -5013,7 +5013,6 @@
             // 1. Process HH_members
             const members = data['Related HH_members'] || data.HH_members || data.Members || data['HH members'] || [];
             console.log('HH_members data:', members);
-            console.log('HH_members count:', members.length);
 
             const memberBody = document.getElementById('HH_members_BODY');
             if (memberBody && Array.isArray(members) && members.length > 0) {
@@ -5022,20 +5021,19 @@
                     const row = document.createElement('tr');
                     row.className = 'c6';
 
-                    // Create cells with proper IDs and values
+                    // Define cells mapping from AppSheet Template
                     const cells = [
-                        { id: 'TT', value: i + 1 },
-                        { id: 'Member_name', value: m['Member name'] || m.Member_name || m['Tên'] || m['Full Name'] || m['Name'] || m.Name || '' },
-                        { id: 'Gender', value: transformValue(m.Gender || m['Giới tính'] || '', 'dropdown') },
-                        { id: 'Member_year_of_birth', value: m['Year of birth'] || m['Năm sinh'] || m.Year_of_birth || '' },
-                        { id: 'Ethnic', value: transformValue(m.Ethnic || m.Ethlic || m['Dân tộc'] || '', 'dropdown') },
-                        { id: 'Relatives', value: transformValue(m.Relatives || m['Quan hệ với chủ hộ'] || m['Relationship with the household head'] || '', 'dropdown') },
-                        { id: 'Study_level', value: transformValue(m['Study level'] || m['Học vấn cao nhất'] || m['Highest education level'] || '', 'dropdown') },
-                        { id: 'Member_participate_coffee', value: transformValue(m['Member participate in coffee production'] || m['Pember participate in coffee production'] || m.Participate || m['Thành viên có tham gia sản xuất cà phê không?'] || '', 'dropdown') },
-                        { id: 'Which_stage_production', value: transformValue(m['Which stage of production'] || m['Which stages of production'] || m.Stage || m['Tham gia công đoạn nào'] || '', 'dropdown') }
+                        { value: i + 1 }, // TT
+                        { value: m['Member_name'] || m['Member name'] || m['Tên'] || m.Name || '' },
+                        { value: transformValue(m['Gender'] || m['Giới tính'] || '', 'dropdown') },
+                        { value: m['Year of birth'] || m['Year_of_birth'] || m['Năm sinh'] || '' },
+                        { value: transformValue(m['Ethlic'] || m['Ethnic'] || m['Dân tộc'] || '', 'dropdown') },
+                        { value: transformValue(m['Relatives'] || m['Quan hệ với chủ hộ'] || '', 'dropdown') },
+                        { value: transformValue(m['Study level'] || m['Study_level'] || m['Học vấn cao nhất'] || '', 'dropdown') },
+                        { value: transformValue(m['Pember participate in coffee production'] || m['Member participate in coffee production'] || m['Thành viên có tham gia sản xuất cà phê không?'] || '', 'dropdown') },
+                        { value: transformValue(m['Which stage of production'] || m['Which_stage_production'] || m['Tham gia công đoạn nào'] || '', 'dropdown') }
                     ];
 
-                    // Use correct class names matching the thead structure
                     const colClasses = ['c12 c17 c92', 'c12 c17 c112', 'c12 c17 c128', 'c12 c17 c126', 'c68 c12 c17', 'c12 c17 c91', 'c12 c17 c115', 'c12 c17 c133', 'c12 c17 c106'];
 
                     cells.forEach((cell, idx) => {
@@ -5048,8 +5046,7 @@
                         p.className = 'c3';
 
                         const span = document.createElement('span');
-                        span.id = cell.id;
-                        span.className = 'c1';
+                        span.className = 'c1'; // Removed id to avoid duplicates
                         span.innerText = cell.value;
 
                         p.appendChild(span);
@@ -5064,42 +5061,54 @@
             // 2. Process LAND_PLOTS
             const plots = data['Related LAND_PLOTS'] || data.LAND_PLOTS || data.Plots || data['Land plots'] || [];
             console.log('LAND_PLOTS data:', plots);
-            console.log('LAND_PLOTS count:', plots.length);
 
             const plotBody = document.getElementById('LAND_PLOTS_BODY');
             if (plotBody && Array.isArray(plots) && plots.length > 0) {
-                const templateRow = plotBody.querySelector('tr');
-                if (templateRow) {
-                    plotBody.innerHTML = '';
-                    plots.forEach((p, i) => {
-                        const row = templateRow.cloneNode(true);
-                        const spans = row.querySelectorAll('span.c1');
-                        if (spans.length >= 14) {
-                            const toLower = (val) => (val && typeof val === 'string') ? val.toLowerCase() : val;
-                            spans[0].innerText = i + 1;
-                            spans[1].innerText = p.Area_Ha || p['Diện tích (ha)'] || '';
-                            spans[2].innerText = p['Forest area per plot'] || p['Diện tích đất rừng trên mảnh (ha)'] || '';
-                            spans[3].innerText = p.Tree_Count || p['Số lượng gốc cà phê'] || '';
-                            spans[4].innerText = toLower(p.Intercropping_YN || p['Có trồng xen cây khác'] || '');
-                            spans[5].innerText = toLower(p.Tree_Intercropping || p['Cây trồng xen'] || '');
-                            spans[6].innerText = p.Harvest_Area || p['Diện tích cho thu hoạch'] || '';
-                            spans[7].innerText = p.Yield_2025 || p['Sản lượng năm 2025 (tấn)'] || '';
-                            spans[8].innerText = toLower(p.Ownership_Type || p['Hình thức sở hữu'] || '');
-                            spans[9].innerText = p.Start_Year || p['Năm bắt đầu trồng'] || '';
-                            spans[10].innerText = p.Recent_Year || p['Năm trồng cà phê gần nhất'] || '';
-                            spans[11].innerText = toLower(p.Previous_Crop || p['Cây trồng trước khi trồng'] || '');
-                            spans[12].innerText = p.Forest_Distance || p['Khoảng cách tới rừng gần nhất? (km)'] || '';
-                            spans[13].innerText = toLower(p.GPS_Mapped_YN || p['Đất của bạn đã được lập bản đồ địa lý chưa?'] || '');
-                        }
-                        plotBody.appendChild(row);
+                plotBody.innerHTML = '';
+                plots.forEach((p, i) => {
+                    const row = document.createElement('tr');
+                    row.className = 'c6';
+
+                    const cells = [
+                        { value: i + 1, classes: 'c127' },
+                        { value: p['Area_Ha'] || p['Area Ha'] || p['Diện tích (ha)'] || '', classes: 'c52' },
+                        { value: p['Forest area per plot'] || p['Diện tích đất rừng trên mảnh (ha)'] || '', classes: 'c89' },
+                        { value: p['Tree_Count'] || p['Tree Count'] || p['Số lượng gốc cà phê'] || '', classes: 'c121' },
+                        { value: transformValue(p['Intercropping_YN'] || p['Có trồng xen cây khác'] || '', 'dropdown'), classes: 'c157', colspan: '2' },
+                        { value: p['Harvest_Area'] || p['Diện tích cho thu hoạch'] || '', classes: 'c27' },
+                        { value: p['Yield_2025'] || p['Sản lượng năm 2025 (tấn)'] || '', classes: 'c27' },
+                        { value: transformValue(p['Ownership_Type'] || p['Hình thức sở hữu'] || '', 'dropdown'), classes: 'c110' },
+                        { value: p['Start_Year'] || p['Năm bắt đầu trồng'] || '', classes: 'c121' },
+                        { value: p['Recent_Year'] || p['Năm trồng cà phê gần nhất'] || '', classes: 'c72' },
+                        { value: transformValue(p['Previous_Crop'] || p['Cây trồng trước khi trồng'] || '', 'dropdown'), classes: 'c131' },
+                        { value: p['Forest_Distance'] || p['Khoảng cách tới rừng gần nhất? (km)'] || '', classes: 'c144', colspan: '2' },
+                        { value: transformValue(p['GPS_Mapped_YN'] || p['Đất của bạn đã được lập bản đồ địa lý chưa?'] || '', 'dropdown'), classes: 'c122' }
+                    ];
+
+                    cells.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.className = 'c12 c17 ' + (cell.classes || '');
+                        td.setAttribute('colspan', cell.colspan || '1');
+                        td.setAttribute('rowspan', '1');
+
+                        const pTag = document.createElement('p');
+                        pTag.className = 'c3';
+
+                        const span = document.createElement('span');
+                        span.className = 'c1';
+                        span.innerText = cell.value;
+
+                        pTag.appendChild(span);
+                        td.appendChild(pTag);
+                        row.appendChild(td);
                     });
-                }
+                    plotBody.appendChild(row);
+                });
             }
 
             // 3. Process SUBTAINABLE_AGRI
             const agri = data['Related SUBTAINABLE_AGRI'] || data.SUBTAINABLE_AGRI || data.SustainableAgri || data['Sustainable Agriculture'] || [];
             console.log('SUBTAINABLE_AGRI data:', agri);
-            console.log('SUBTAINABLE_AGRI count:', agri.length);
 
             const agriBody = document.getElementById('SUBTAINABLE_AGRI_BODY');
             if (agriBody && Array.isArray(agri) && agri.length > 0) {
@@ -5108,16 +5117,16 @@
                     const row = document.createElement('tr');
                     row.className = 'c6';
 
-                    // Define data cells with proper field mappings
+                    // Define data cells with proper field mappings from AppSheet
                     const cells = [
-                        { value: a.TT || i + 1, colspan: '1', classes: 'c99 c150' },
-                        { value: a.Certificate || a['Tên phương thức/Chứng chỉ'] || '', colspan: '3', classes: 'c55' },
-                        { value: transformValue(a.Is_Known || a['Có thành viên nào trong gia đình biết về phương thức canh tác này không?'] || '', 'dropdown'), colspan: '2', classes: 'c99 c147' },
-                        { value: a.Who_Knows_Most || a['Thành viên nào trong gia đình biết nhiều nhất về phương thức canh tác này?'] || '', colspan: '2', classes: 'c86' },
-                        { value: transformValue(a.Is_Beneficial || a['Bạn có thấy phương thức canh tác này tốt và hữu ích không?'] || '', 'dropdown'), colspan: '2', classes: 'c45 c99' },
-                        { value: transformValue(a.Is_Practiced || a['Phương thức canh tác này có được thực hiện trên đất của bạn không?'] || '', 'dropdown'), colspan: '2', classes: 'c99 c148' },
-                        { value: transformValue(a.Is_Certified || a['Có được chứng nhận không?'] || '', 'dropdown'), colspan: '2', classes: 'c74' },
-                        { value: a.Who_Practices || a['Ai là người thực hành phương thức canh tác này?'] || '', colspan: '2', classes: 'c99 c124' }
+                        { value: i + 1, colspan: '1', classes: 'c99 c150' },
+                        { value: a['Certificate'] || a['Tên phương thức/Chíứng chỉ'] || '', colspan: '3', classes: 'c55' },
+                        { value: transformValue(a['Is_Known'] || a['Is Known'] || '', 'dropdown'), colspan: '2', classes: 'c99 c147' },
+                        { value: a['Who_Knows_Most'] || a['Who Knows Most'] || '', colspan: '2', classes: 'c86' },
+                        { value: transformValue(a['Is_Beneficial'] || a['Is Beneficial'] || '', 'dropdown'), colspan: '2', classes: 'c45 c99' },
+                        { value: transformValue(a['Is_Practiced'] || a['Is Practiced'] || '', 'dropdown'), colspan: '2', classes: 'c99 c148' },
+                        { value: transformValue(a['Is_Certified'] || a['Is Certified'] || '', 'dropdown'), colspan: '2', classes: 'c74' },
+                        { value: a['Who_Practices'] || a['Who Practices'] || '', colspan: '2', classes: 'c99 c124' }
                     ];
 
                     cells.forEach(cell => {
