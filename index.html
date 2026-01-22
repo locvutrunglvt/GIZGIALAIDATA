@@ -2711,8 +2711,10 @@
                 <p class="c33"><span class="c15">&nbsp;Gia Lai</span></p>
             </td>
             <td class="c60 c109" colspan="2" rowspan="5" style="text-align: center; vertical-align: middle;">
-                <img src="https://drive.google.com/thumbnail?id=<<[Image_ID]>>"
-                    style="width: 4cm; height: 6cm; border: 1px solid #ccc; object-fit: cover;" alt="Ảnh đại diện" />
+                <img id="Farmer_Photo" src="https://drive.google.com/thumbnail?id=<<[ID]>>"
+                    style="width: 4cm; height: 6cm; border: 1px solid #ccc; object-fit: cover; display: none;"
+                    alt="Ảnh đại diện" />
+                <div id="Image_Loading_Notice" style="font-size: 10px; color: #666;">Đang tải ảnh...</div>
             </td>
         </tr>
         <tr class="c142">
@@ -4989,46 +4991,75 @@
 
             console.log("Dữ liệu nhận được từ URL:", data);
 
-            // Regex cải tiến để bắt các khối AppSheet
-            // Bắt cả <<...>> và &lt;&lt;...&gt;&gt;
+            // Regex để bắt <<...>> và &lt;&lt;...&gt;&gt;
             const placeholderRegex = /(?:&lt;&lt;|<<)([\s\S]*?)(?:&gt;&gt;|>>)/g;
 
-            // Hàm xử lý việc trích xuất tên trường sạch (clean field name)
+            // Hàm trích xuất tên trường [FieldName]
             function getCleanFieldName(rawMatch) {
                 const inner = rawMatch.replace(/&lt;&lt;|<<|&gt;&gt;|>>/g, '');
                 const bracketMatch = inner.match(/\[(.*?)\]/);
                 return bracketMatch ? bracketMatch[1].trim() : inner.trim();
             }
 
-            // Hàm xử lý biểu thức logic AppSheet Đơn giản (IF, LOOKUP)
+            // Hàm xử lý biểu thức AppSheet (IF, LOOKUP, basic fields)
             function evaluateAppSheetExpression(expression, data) {
-                // Xử lý trường hợp LOOKUP(...) = "Nam" ? "Ông" : "Bà"
-                // Đây là trường hợp cụ thể người dùng yêu cầu
                 if (expression.includes("IF") && expression.includes("Gender")) {
                     const genderValue = data['Gender'] || "";
                     if (genderValue.toLowerCase() === "nam") return "Ông";
                     if (genderValue.toLowerCase() === "nữ" || genderValue.toLowerCase() === "nu") return "Bà";
                 }
 
-                // Trích xuất tên trường cơ bản [FieldName]
                 const fieldName = getCleanFieldName(expression);
                 if (data[fieldName] !== undefined) {
                     return data[fieldName];
                 }
-
-                return null; // Không tìm thấy
+                return null;
             }
 
-            // 1. Xử lý các thẻ IMG (thay thế ID trong thuộc tính src)
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
+            // 1. Định nghĩa hàm thay thế văn bản AN TOÀN (chỉ tác động lên Text Nodes)
+            function replaceTextInNode(node) {
+                if (node.nodeType === 3) { // Text node
+                    const originalText = node.nodeValue;
+                    if (originalText.includes('<<') || originalText.includes('>>')) {
+                        const newText = originalText.replace(placeholderRegex, (match, expression) => {
+                            const result = evaluateAppSheetExpression(expression, data);
+                            return (result !== null) ? result : match;
+                        });
+                        if (newText !== originalText) {
+                            node.nodeValue = newText;
+                        }
+                    }
+                } else if (node.nodeType === 1) { // Element node
+                    if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+
+                    // Xử lý một số thuộc tính đặc biệt
+                    ['title', 'alt'].forEach(attr => {
+                        const val = node.getAttribute(attr);
+                        if (val && (val.includes('<<') || val.includes('>>'))) {
+                            node.setAttribute(attr, val.replace(placeholderRegex, (match, expression) => {
+                                const result = evaluateAppSheetExpression(expression, data);
+                                return (result !== null) ? result : match;
+                            }));
+                        }
+                    });
+
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        replaceTextInNode(node.childNodes[i]);
+                    }
+                }
+            }
+
+            // 2. Chạy thay thế văn bản toàn bộ document (BỎ QUA innerHTML re-assignment)
+            replaceTextInNode(document.body);
+
+            // 3. Xử lý các thẻ IMG khác (trừ Farmer_Photo)
+            const otherImages = document.querySelectorAll('img:not(#Farmer_Photo)');
+            otherImages.forEach(img => {
                 let src = img.getAttribute('src');
-                if (src && (src.includes('<<') || src.includes('&lt;'))) {
+                if (src && (src.includes('<<') || src.includes('>>'))) {
                     const newSrc = src.replace(placeholderRegex, (match, expression) => {
                         const fieldName = getCleanFieldName(expression);
                         if (data[fieldName]) return data[fieldName];
-                        // Fallback cho ảnh đại diện
-                        if ((fieldName === 'Image_ID' || fieldName === 'ID') && data['Image_ID']) return data['Image_ID'];
                         if ((fieldName === 'Image_ID' || fieldName === 'ID') && data['ID']) return data['ID'];
                         return match;
                     });
@@ -5038,32 +5069,64 @@
                 }
             });
 
-            // 2. Xử lý các phần tử văn bản (Deep scan)
-            const targets = document.querySelectorAll('p, span, td, div, h1, h2, h3, li');
-            targets.forEach(el => {
-                // Chỉ xử lý các phần tử có chứa dấu hiệu placeholder và không có con (hoặc textDirect)
-                if (el.children.length > 0 && !(el.innerText.includes('<<') || el.innerText.includes('&lt;'))) return;
+            // 4. CHỐT : Xử lý Ảnh chân dung (Farmer_Photo) - Hỗ trợ VÒNG LẶP (Looping)
+            const photoContainer = document.getElementById('Related_Images_CONTAINER_TOP');
+            const loadingNotice = document.getElementById('Image_Loading_Notice');
 
-                let originalHTML = el.innerHTML;
-                if (!originalHTML.includes('&lt;&lt;') && !originalHTML.includes('<<')) return;
+            // Thu thập TẤT CẢ các ID ảnh khả thi từ URL
+            let allIds = [];
 
-                const newHTML = originalHTML.replace(placeholderRegex, (match, expression) => {
-                    const result = evaluateAppSheetExpression(expression, data);
-                    return (result !== null) ? result : match;
+            function extractIds(val) {
+                if (!val) return [];
+                if (Array.isArray(val)) return val.flatMap(v => extractIds(v));
+                return val.split(',').map(s => s.trim()).filter(s => s !== "");
+            }
+
+            // Ưu tiên Farmer_ID và ID
+            const keysToScan = ['Farmer_ID', 'ID', 'Image_ID', 'Photo', 'Image', 'Images', 'Farmer_Photo'];
+            keysToScan.forEach(key => {
+                const values = params.getAll(key);
+                values.forEach(v => {
+                    allIds = allIds.concat(extractIds(v));
                 });
-
-                if (newHTML !== originalHTML) {
-                    el.innerHTML = newHTML;
-                }
             });
 
-            // 3. Quét toàn bộ body cho các trường hợp sót
-            let bodyHTML = document.body.innerHTML;
-            if (bodyHTML.includes('&lt;&lt;') || bodyHTML.includes('<<')) {
-                document.body.innerHTML = bodyHTML.replace(placeholderRegex, (match, expression) => {
-                    const result = evaluateAppSheetExpression(expression, data);
-                    return (result !== null) ? result : match;
+            const uniqueIds = [...new Set(allIds)];
+
+            if (uniqueIds.length > 0 && photoContainer) {
+                // Xóa ảnh cũ (c-farmer-img)
+                const existingImgs = photoContainer.querySelectorAll('img.c-farmer-img');
+                existingImgs.forEach(img => img.remove());
+
+                uniqueIds.forEach(targetId => {
+                    const img = document.createElement('img');
+                    img.className = 'c-farmer-img';
+                    img.style.display = 'block';
+                    img.style.width = '151px'; // ~4cm
+                    img.style.height = '227px'; // ~6cm
+                    img.style.objectFit = 'cover';
+                    img.style.margin = '5px auto';
+                    img.alt = 'Ảnh người phỏng vấn';
+                    img.src = `https://drive.google.com/thumbnail?id=${targetId}`;
+
+                    img.onload = () => {
+                        if (loadingNotice) loadingNotice.style.display = 'none';
+                    };
+
+                    img.onerror = () => {
+                        console.error('Không thể tải ảnh ID:', targetId);
+                        if (photoContainer.querySelectorAll('img.c-farmer-img').length === 1 && loadingNotice) {
+                            loadingNotice.innerText = 'Không thể tải ảnh chân dung.';
+                            loadingNotice.style.display = 'block';
+                        }
+                    };
+
+                    photoContainer.appendChild(img);
                 });
+
+                if (loadingNotice) loadingNotice.style.display = 'none';
+            } else if (loadingNotice) {
+                loadingNotice.innerText = 'Không có hình ảnh chân dung.';
             }
 
             console.log("Hoàn tất điền dữ liệu.");
