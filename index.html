@@ -2677,8 +2677,8 @@
 <body class="c139 doc-content">
     <h1 class="c61 c130"><span
             style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 377.30px; height: 61.48px;"><img
-                alt="" src="images/image1.jpg"
-                style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                alt="" src="https://raw.githubusercontent.com/locvutrunglvt/GIZGIALAIDATA/refs/heads/main/Logo.jpg"
+                style="width: 377px; height: auto; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
                 title=""></span></h1>
     <h2 class="c9 c130"><span class="c69 c160">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</span></h2>
     <h2 class="c9 c130"><span class="c69 c160">VI&#7878;N KINH T&#7870; V&Agrave; TH&#7874; CH&#7870; N&Ocirc;NG
@@ -4978,7 +4978,7 @@
     <script>
         /**
          * Chức năng tự động lấy dữ liệu từ URL và điền vào các vị trí tương ứng trong HTML GỐC.
-         * Hỗ trợ cả văn bản hiển thị và các thuộc tính như 'src' của ảnh.
+         * Hỗ trợ văn bản hiển thị, thuộc tính 'src', và các biểu thức IF phức tạp cho danh xưng.
          */
         function fillDataFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -4989,17 +4989,34 @@
 
             console.log("Dữ liệu nhận được từ URL:", data);
 
-            // Regex để tìm các cấu trúc như <<[Field]>>, <<LOOKUP(...[Field]...)>>, <<[_thisrow].[Field]>>
-            const placeholderRegex = /(?:&lt;&lt;|<<).*?\[(.*?)\].*?(?:&gt;&gt;|>>)/g;
+            // Regex cải tiến để bắt các khối AppSheet
+            // Bắt cả <<...>> và &lt;&lt;...&gt;&gt;
+            const placeholderRegex = /(?:&lt;&lt;|<<)([\s\S]*?)(?:&gt;&gt;|>>)/g;
 
             // Hàm xử lý việc trích xuất tên trường sạch (clean field name)
             function getCleanFieldName(rawMatch) {
-                const parts = rawMatch.split('[');
-                if (parts.length > 1) {
-                    const lastPart = parts[parts.length - 1];
-                    return lastPart.split(']')[0].trim();
+                const inner = rawMatch.replace(/&lt;&lt;|<<|&gt;&gt;|>>/g, '');
+                const bracketMatch = inner.match(/\[(.*?)\]/);
+                return bracketMatch ? bracketMatch[1].trim() : inner.trim();
+            }
+
+            // Hàm xử lý biểu thức logic AppSheet Đơn giản (IF, LOOKUP)
+            function evaluateAppSheetExpression(expression, data) {
+                // Xử lý trường hợp LOOKUP(...) = "Nam" ? "Ông" : "Bà"
+                // Đây là trường hợp cụ thể người dùng yêu cầu
+                if (expression.includes("IF") && expression.includes("Gender")) {
+                    const genderValue = data['Gender'] || "";
+                    if (genderValue.toLowerCase() === "nam") return "Ông";
+                    if (genderValue.toLowerCase() === "nữ" || genderValue.toLowerCase() === "nu") return "Bà";
                 }
-                return rawMatch.trim();
+
+                // Trích xuất tên trường cơ bản [FieldName]
+                const fieldName = getCleanFieldName(expression);
+                if (data[fieldName] !== undefined) {
+                    return data[fieldName];
+                }
+
+                return null; // Không tìm thấy
             }
 
             // 1. Xử lý các thẻ IMG (thay thế ID trong thuộc tính src)
@@ -5007,11 +5024,12 @@
             images.forEach(img => {
                 let src = img.getAttribute('src');
                 if (src && (src.includes('<<') || src.includes('&lt;'))) {
-                    const newSrc = src.replace(placeholderRegex, (match, captured) => {
-                        const fieldName = getCleanFieldName(captured);
+                    const newSrc = src.replace(placeholderRegex, (match, expression) => {
+                        const fieldName = getCleanFieldName(expression);
                         if (data[fieldName]) return data[fieldName];
-                        // Fallback: nếu không có Image_ID, thử Farmer_ID hoặc ID chung
-                        if (fieldName === 'Image_ID' && data['ID']) return data['ID'];
+                        // Fallback cho ảnh đại diện
+                        if ((fieldName === 'Image_ID' || fieldName === 'ID') && data['Image_ID']) return data['Image_ID'];
+                        if ((fieldName === 'Image_ID' || fieldName === 'ID') && data['ID']) return data['ID'];
                         return match;
                     });
                     if (newSrc !== src) {
@@ -5020,20 +5038,18 @@
                 }
             });
 
-            // 2. Xử lý các phần tử văn bản
+            // 2. Xử lý các phần tử văn bản (Deep scan)
             const targets = document.querySelectorAll('p, span, td, div, h1, h2, h3, li');
             targets.forEach(el => {
+                // Chỉ xử lý các phần tử có chứa dấu hiệu placeholder và không có con (hoặc textDirect)
                 if (el.children.length > 0 && !(el.innerText.includes('<<') || el.innerText.includes('&lt;'))) return;
 
                 let originalHTML = el.innerHTML;
                 if (!originalHTML.includes('&lt;&lt;') && !originalHTML.includes('<<')) return;
 
-                const newHTML = originalHTML.replace(placeholderRegex, (match, captured) => {
-                    const fieldName = getCleanFieldName(captured);
-                    if (fieldName && data[fieldName] !== undefined) {
-                        return data[fieldName];
-                    }
-                    return match;
+                const newHTML = originalHTML.replace(placeholderRegex, (match, expression) => {
+                    const result = evaluateAppSheetExpression(expression, data);
+                    return (result !== null) ? result : match;
                 });
 
                 if (newHTML !== originalHTML) {
@@ -5041,11 +5057,12 @@
                 }
             });
 
-            // 3. Quét toàn bộ body một lần cuối
-            if (document.body.innerHTML.includes('&lt;&lt;') || document.body.innerHTML.includes('<<')) {
-                document.body.innerHTML = document.body.innerHTML.replace(placeholderRegex, (match, captured) => {
-                    const fieldName = getCleanFieldName(captured);
-                    return data[fieldName] !== undefined ? data[fieldName] : match;
+            // 3. Quét toàn bộ body cho các trường hợp sót
+            let bodyHTML = document.body.innerHTML;
+            if (bodyHTML.includes('&lt;&lt;') || bodyHTML.includes('<<')) {
+                document.body.innerHTML = bodyHTML.replace(placeholderRegex, (match, expression) => {
+                    const result = evaluateAppSheetExpression(expression, data);
+                    return (result !== null) ? result : match;
                 });
             }
 
