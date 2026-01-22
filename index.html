@@ -2710,11 +2710,9 @@
             <td class="c65 c60" colspan="1" rowspan="1">
                 <p class="c33"><span class="c15">&nbsp;Gia Lai</span></p>
             </td>
-            <td class="c60 c109" colspan="2" rowspan="5">
-                <p class="c9"><span class="c3">&lt;&lt;Start: [Related Images]&gt;&gt;</span></p>
-                <p class="c9"><span class="c3">&nbsp; &nbsp; &lt;img
-                        src=&quot;https://drive.google.com/thumbnail?id=&lt;&lt;[ID]&gt;&gt;&quot; /&gt;</span></p>
-                <p class="c9"><span class="c3">&lt;&lt;End&gt;&gt;</span></p>
+            <td class="c60 c109" colspan="2" rowspan="5" style="text-align: center; vertical-align: middle;">
+                <img src="https://drive.google.com/thumbnail?id=<<[Image_ID]>>"
+                    style="width: 4cm; height: 6cm; border: 1px solid #ccc; object-fit: cover;" alt="Ảnh đại diện" />
             </td>
         </tr>
         <tr class="c142">
@@ -4980,33 +4978,22 @@
     <script>
         /**
          * Chức năng tự động lấy dữ liệu từ URL và điền vào các vị trí tương ứng trong HTML GỐC.
-         * Nó tìm kiếm các đoạn văn bản có dạng <<...[TênTrường]...>> và thay thế bằng giá trị thực tế.
+         * Hỗ trợ cả văn bản hiển thị và các thuộc tính như 'src' của ảnh.
          */
         function fillDataFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const data = {};
             for (const [key, value] of params.entries()) {
-                // Chuyển đổi key thành dạng chuẩn nếu cần (loại bỏ khoảng trắng dư thừa)
                 data[key.trim()] = value;
             }
 
             console.log("Dữ liệu nhận được từ URL:", data);
 
-            // 1. Thay thế các phần tử có ID trùng với tên tham số (nếu có)
-            const elementsWithId = document.querySelectorAll('[id]');
-            elementsWithId.forEach(el => {
-                if (data[el.id]) {
-                    el.innerText = data[el.id];
-                }
-            });
-
-            // 2. Tìm và thay thế các chuỗi <<...[FieldName]...>> trong nội dung văn bản
-            // Regex này bắt được các cấu trúc như <<[Field]>>, <<LOOKUP(...[Field]...)>>, <<[_thisrow].[Field]>>
-            const placeholderRegex = /&lt;&lt;.*?\[(.*?)\].*?&gt;&gt;/g;
+            // Regex để tìm các cấu trúc như <<[Field]>>, <<LOOKUP(...[Field]...)>>, <<[_thisrow].[Field]>>
+            const placeholderRegex = /(?:&lt;&lt;|<<).*?\[(.*?)\].*?(?:&gt;&gt;|>>)/g;
 
             // Hàm xử lý việc trích xuất tên trường sạch (clean field name)
             function getCleanFieldName(rawMatch) {
-                // Lấy phần bên trong [ ] cuối cùng (phổ biến nhất cho tên trường)
                 const parts = rawMatch.split('[');
                 if (parts.length > 1) {
                     const lastPart = parts[parts.length - 1];
@@ -5015,22 +5002,38 @@
                 return rawMatch.trim();
             }
 
-            // Quét qua tất cả các thẻ có khả năng chứa văn bản
+            // 1. Xử lý các thẻ IMG (thay thế ID trong thuộc tính src)
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                let src = img.getAttribute('src');
+                if (src && (src.includes('<<') || src.includes('&lt;'))) {
+                    const newSrc = src.replace(placeholderRegex, (match, captured) => {
+                        const fieldName = getCleanFieldName(captured);
+                        if (data[fieldName]) return data[fieldName];
+                        // Fallback: nếu không có Image_ID, thử Farmer_ID hoặc ID chung
+                        if (fieldName === 'Image_ID' && data['ID']) return data['ID'];
+                        return match;
+                    });
+                    if (newSrc !== src) {
+                        img.src = newSrc;
+                    }
+                }
+            });
+
+            // 2. Xử lý các phần tử văn bản
             const targets = document.querySelectorAll('p, span, td, div, h1, h2, h3, li');
             targets.forEach(el => {
-                if (el.children.length > 0) return; // Chỉ xử lý các thẻ lá (leaf nodes) để tránh thay thế lặp lại
+                if (el.children.length > 0 && !(el.innerText.includes('<<') || el.innerText.includes('&lt;'))) return;
 
                 let originalHTML = el.innerHTML;
-                if (!originalHTML.includes('&lt;&lt;')) return;
+                if (!originalHTML.includes('&lt;&lt;') && !originalHTML.includes('<<')) return;
 
                 const newHTML = originalHTML.replace(placeholderRegex, (match, captured) => {
                     const fieldName = getCleanFieldName(captured);
-                    console.log("Đang xử lý trường:", fieldName);
-
-                    if (data[fieldName] !== undefined) {
+                    if (fieldName && data[fieldName] !== undefined) {
                         return data[fieldName];
                     }
-                    return match; // Giữ nguyên nếu không tìm thấy dữ liệu
+                    return match;
                 });
 
                 if (newHTML !== originalHTML) {
@@ -5038,9 +5041,8 @@
                 }
             });
 
-            // 3. Quét toàn bộ body một lần cuối cho các trường hợp đặc biệt không nằm trong thẻ lá
-            // (Chỉ thực hiện nếu còn biểu tượng <<)
-            if (document.body.innerHTML.includes('&lt;&lt;')) {
+            // 3. Quét toàn bộ body một lần cuối
+            if (document.body.innerHTML.includes('&lt;&lt;') || document.body.innerHTML.includes('<<')) {
                 document.body.innerHTML = document.body.innerHTML.replace(placeholderRegex, (match, captured) => {
                     const fieldName = getCleanFieldName(captured);
                     return data[fieldName] !== undefined ? data[fieldName] : match;
@@ -5050,7 +5052,6 @@
             console.log("Hoàn tất điền dữ liệu.");
         }
 
-        // Thực thi khi trang đã sẵn sàng
         window.addEventListener('load', fillDataFromUrl);
     </script>
 </body>
