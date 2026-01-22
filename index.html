@@ -4983,183 +4983,169 @@
          * Hỗ trợ văn bản hiển thị, thuộc tính 'src', và các biểu thức IF phức tạp cho danh xưng.
          */
         function fillDataFromUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const data = {};
-            for (const [key, value] of params.entries()) {
-                data[key.trim()] = value;
-            }
-
-            console.log("Dữ liệu nhận được từ URL:", data);
-
-            // 0. CHUẨN HÓA: Thay thế &lt;&lt; / &gt;&gt; thành << / >> trong toàn bộ body
-            // Điều này giúp script xử lý đồng nhất kể cả khi AppSheet encode dấu ngoặc.
-            document.body.innerHTML = document.body.innerHTML.replace(/&lt;&lt;/g, '<<').replace(/&gt;&gt;/g, '>>');
-
-            const placeholderRegex = /<<([\s\S]*?)>>/g;
-            const startRegex = /<<Start:\s*\[?(Related\s+)?(.*?)\]?>>/i;
-            const endRegex = /<<End>>/i;
-
-            function getCleanFieldName(rawMatch) {
-                const bracketMatch = rawMatch.match(/\[(.*?)\]/);
-                return bracketMatch ? bracketMatch[1].trim() : rawMatch.trim();
-            }
-
-            function evaluateAppSheetExpression(expression, rowData) {
-                const cleanExpr = expression.trim();
-
-                // Xử lý IF Gender
-                if (cleanExpr.includes("IF") && (cleanExpr.includes("Gender") || cleanExpr.includes("[Gender]"))) {
-                    const genderValue = rowData['Gender'] || data['Gender'] || "";
-                    if (genderValue.toLowerCase() === "nam") return "Ông";
-                    if (genderValue.toLowerCase().startsWith("n")) return "Bà";
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const data = {};
+                for (const [key, value] of params.entries()) {
+                    data[key.trim()] = value;
                 }
 
-                // Xử lý LOOKUP/SELECT (trích xuất Field Name cơ bản)
-                // Ví dụ: <<lookup([Study level],...)>> -> Study level
-                const fieldMatch = cleanExpr.match(/\[(.*?)\]/);
-                if (fieldMatch) {
-                    const fieldName = fieldMatch[1].trim();
-                    if (rowData[fieldName] !== undefined) return rowData[fieldName];
-                    if (data[fieldName] !== undefined) return data[fieldName];
+                console.log("Dữ liệu nhận được từ URL:", data);
+
+                // 0. CHUẨN HÓA BẬC CAO: Sửa lỗi trình duyệt tự parse << >> thành các thẻ tag lạ
+                let rawHTML = document.body.innerHTML;
+
+                // Fix các thẻ tag sai dạng <start: [related="" hh_members]="">
+                rawHTML = rawHTML.replace(/<start:?\s*([^>]+)>/gi, (match, p1) => `<<Start: ${p1.replace(/=""/g, '').trim()}>>`);
+                rawHTML = rawHTML.replace(/<end>/gi, '<<End>>');
+                // Fix &lt;&lt; và &gt;&gt;
+                rawHTML = rawHTML.replace(/&lt;&lt;/g, '<<').replace(/&gt;&gt;/g, '>>');
+
+                document.body.innerHTML = rawHTML;
+
+                const placeholderRegex = /<<([\s\S]*?)>>/g;
+                const startRegex = /<<Start:\s*\[?(Related\s+)?(.*?)\]?>>/i;
+                const endRegex = /<<End>>/i;
+
+                function evaluateAppSheetExpression(expression, rowData) {
+                    let cleanExpr = expression.trim();
+                    cleanExpr = cleanExpr.replace(/<[^>]*>?/gm, ''); // Xóa HTML rác
+
+                    if (cleanExpr.includes("IF") && (cleanExpr.includes("Gender") || cleanExpr.includes("[Gender]"))) {
+                        const genderValue = rowData['Gender'] || data['Gender'] || "";
+                        if (genderValue.toLowerCase() === "nam") return "Ông";
+                        if (genderValue.toLowerCase().startsWith("n")) return "Bà";
+                    }
+
+                    const fieldMatch = cleanExpr.match(/\[(.*?)\]/);
+                    if (fieldMatch) {
+                        const fieldName = fieldMatch[1].trim();
+                        if (rowData[fieldName] !== undefined) return rowData[fieldName];
+                        if (data[fieldName] !== undefined) return data[fieldName];
+                    }
+
+                    if (rowData[cleanExpr] !== undefined) return rowData[cleanExpr];
+                    if (data[cleanExpr] !== undefined) return data[cleanExpr];
+                    return null;
                 }
 
-                if (rowData[cleanExpr] !== undefined) return rowData[cleanExpr];
-                if (data[cleanExpr] !== undefined) return data[cleanExpr];
+                // 1. XỬ LÝ VÒNG LẶP (START/END)
+                const rows = Array.from(document.querySelectorAll('tr'));
+                rows.forEach(tr => {
+                    const content = tr.innerHTML;
+                    const matchStart = content.match(startRegex);
 
-                return null;
-            }
+                    if (matchStart) {
+                        const tableName = matchStart[2].replace(/[\[\]]/g, '').trim();
+                        const parent = tr.parentNode;
 
-            // 1. XỬ LÝ VÒNG LẶP (START/END) TRONG BẢNG
-            const rows = Array.from(document.querySelectorAll('tr'));
-            for (let i = 0; i < rows.length; i++) {
-                const tr = rows[i];
-                const content = tr.innerHTML;
-                const matchStart = content.match(startRegex);
-
-                if (matchStart) {
-                    const tableName = matchStart[2].trim();
-                    const templateRow = tr;
-                    const parent = tr.parentNode;
-
-                    // Tìm số lượng bản ghi cho bảng này (TableName_0, TableName_1...)
-                    let index = 0;
-                    const records = [];
-                    while (true) {
-                        const prefix = `${tableName}_${index}_`;
-                        const rowData = {};
-                        let found = false;
-                        for (const [key, value] of params.entries()) {
-                            if (key.startsWith(prefix)) {
-                                const field = key.replace(prefix, "");
-                                rowData[field] = value;
-                                found = true;
+                        let index = 0;
+                        const records = [];
+                        while (true) {
+                            const prefix = `${tableName}_${index}_`;
+                            const rowData = {};
+                            let found = false;
+                            for (const [key, value] of params.entries()) {
+                                if (key.startsWith(prefix)) {
+                                    const field = key.replace(prefix, "");
+                                    rowData[field] = value;
+                                    found = true;
+                                }
                             }
+                            if (!found) break;
+                            records.push(rowData);
+                            index++;
                         }
-                        if (!found) break;
-                        records.push(rowData);
-                        index++;
-                    }
 
-                    console.log(`Tìm thấy bảng ${tableName} với ${records.length} bản ghi.`);
-
-                    if (records.length > 0) {
-                        records.forEach((rowData, idx) => {
-                            const newRow = templateRow.cloneNode(true);
-                            // Thay thế placeholder trong row mới
-                            newRow.innerHTML = newRow.innerHTML.replace(placeholderRegex, (match, expr) => {
-                                // Xóa bỏ Start/End marker nếu nó nằm trong nội dung thay thế
-                                if (idx === 0) expr = expr.replace(startRegex, '').trim();
-                                if (idx === records.length - 1) expr = expr.replace(endRegex, '').trim();
-                                else expr = expr.replace(endRegex, '').trim(); // Luôn xóa End marker
-
-                                const val = evaluateAppSheetExpression(expr, rowData);
-                                return val !== null ? val : "";
+                        if (records.length > 0) {
+                            records.forEach((rowData, idx) => {
+                                const newRow = tr.cloneNode(true);
+                                newRow.innerHTML = newRow.innerHTML.replace(placeholderRegex, (match, expr) => {
+                                    if (startRegex.test(expr)) expr = expr.replace(startRegex, '').trim();
+                                    if (endRegex.test(expr)) expr = expr.replace(endRegex, '').trim();
+                                    if (!expr) return "";
+                                    const val = evaluateAppSheetExpression(expr, rowData);
+                                    return val !== null ? val : "";
+                                });
+                                parent.insertBefore(newRow, tr);
                             });
-                            parent.insertBefore(newRow, templateRow);
-                        });
-                        parent.removeChild(templateRow);
-                    } else {
-                        // Nếu không có dữ liệu, xóa dòng template or replace placeholder bằng trống
-                        tr.innerHTML = tr.innerHTML.replace(placeholderRegex, "");
-                    }
-                }
-            }
-
-            // 2. THAY THẾ CÁC PLACEHOLDER CÒN LẠI (Scalar fields)
-            function replaceTextInNode(node) {
-                if (node.nodeType === 3) {
-                    const text = node.nodeValue;
-                    if (text.includes('<<')) {
-                        node.nodeValue = text.replace(placeholderRegex, (match, expr) => {
-                            const val = evaluateAppSheetExpression(expr, {});
-                            return val !== null ? val : match;
-                        });
-                    }
-                } else if (node.nodeType === 1) {
-                    if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
-                    ['title', 'alt'].forEach(attr => {
-                        const val = node.getAttribute(attr);
-                        if (val && val.includes('<<')) {
-                            node.setAttribute(attr, val.replace(placeholderRegex, (match, expr) => {
-                                const res = evaluateAppSheetExpression(expr, {});
-                                return res !== null ? res : match;
-                            }));
+                            parent.removeChild(tr);
+                        } else {
+                            tr.innerHTML = tr.innerHTML.replace(placeholderRegex, "");
                         }
-                    });
-                    node.childNodes.forEach(replaceTextInNode);
-                }
-            }
-            replaceTextInNode(document.body);
-
-            // 3. XỬ LÝ ẢNH CHÂN DUNG (Looping)
-            const photoContainer = document.getElementById('Related_Images_CONTAINER_TOP');
-            const loadingNotice = document.getElementById('Image_Loading_Notice');
-            if (photoContainer) {
-                let allIds = [];
-                const extractIds = (val) => {
-                    if (!val) return [];
-                    if (Array.isArray(val)) return val.flatMap(extractIds);
-                    return val.split(',').map(s => s.trim()).filter(s => s !== "");
-                };
-                ['Farmer_ID', 'ID', 'Image_ID', 'Photo', 'Image', 'Images', 'Farmer_Photo'].forEach(key => {
-                    params.getAll(key).forEach(v => { allIds = allIds.concat(extractIds(v)); });
+                    }
                 });
-                const uniqueIds = [...new Set(allIds)];
-                if (uniqueIds.length > 0) {
-                    const existingImgs = photoContainer.querySelectorAll('img.c-farmer-img');
-                    existingImgs.forEach(img => img.remove());
-                    uniqueIds.forEach(id => {
-                        const img = document.createElement('img');
-                        img.className = 'c-farmer-img';
-                        img.style.display = 'block';
-                        img.style.width = '151px'; img.style.height = '227px';
-                        img.style.objectFit = 'cover'; img.style.margin = '5px auto';
-                        img.src = `https://drive.google.com/thumbnail?id=${id}`;
-                        img.onload = () => { if (loadingNotice) loadingNotice.style.display = 'none'; };
-                        photoContainer.appendChild(img);
-                    });
-                    if (loadingNotice) loadingNotice.style.display = 'none';
+
+                // 2. scalar replacement
+                function replaceTextInNode(node) {
+                    if (node.nodeType === 3) {
+                        const text = node.nodeValue;
+                        if (text.includes('<<')) {
+                            node.nodeValue = text.replace(placeholderRegex, (match, expr) => {
+                                const val = evaluateAppSheetExpression(expr, {});
+                                return val !== null ? val : match;
+                            });
+                        }
+                    } else if (node.nodeType === 1) {
+                        if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
+                        ['title', 'alt'].forEach(attr => {
+                            const val = node.getAttribute(attr);
+                            if (val && val.includes('<<')) {
+                                node.setAttribute(attr, val.replace(placeholderRegex, (match, expr) => {
+                                    const res = evaluateAppSheetExpression(expr, {});
+                                    return res !== null ? res : match;
+                                }));
+                            }
+                        });
+                        Array.from(node.childNodes).forEach(replaceTextInNode);
+                    }
                 }
+                replaceTextInNode(document.body);
+
+                // 3. Ảnh chân dung
+                const photoContainer = document.getElementById('Related_Images_CONTAINER_TOP');
+                if (photoContainer) {
+                    let ids = [];
+                    ['Farmer_ID', 'ID', 'Image_ID', 'Photo', 'Images'].forEach(k => {
+                        params.getAll(k).forEach(v => {
+                            ids = ids.concat(v.split(',').map(s => s.trim()).filter(s => s));
+                        });
+                    });
+                    const uniqueIds = [...new Set(ids)];
+                    if (uniqueIds.length > 0) {
+                        photoContainer.querySelectorAll('img.c-farmer-img').forEach(img => img.remove());
+                        uniqueIds.forEach(id => {
+                            const img = document.createElement('img');
+                            img.className = 'c-farmer-img';
+                            img.style.cssText = 'display:block;width:151px;height:227px;object-fit:cover;margin:5px auto;';
+                            img.src = `https://drive.google.com/thumbnail?id=${id}`;
+                            const notice = document.getElementById('Image_Loading_Notice');
+                            img.onload = () => { if (notice) notice.style.display = 'none'; };
+                            photoContainer.appendChild(img);
+                        });
+                    }
+                }
+
+                // 4. Các ảnh khác
+                document.querySelectorAll('img:not(.c-farmer-img)').forEach(img => {
+                    let src = img.getAttribute('src');
+                    if (src && src.includes('<<')) {
+                        img.src = src.replace(placeholderRegex, (m, e) => {
+                            const f = e.match(/\[(.*?)\]/)?.[1] || e.trim();
+                            return data[f] || data['ID'] || m;
+                        });
+                    }
+                });
+
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 500);
+                }
+                console.log("Hoàn tất điền dữ liệu.");
+            } catch (err) {
+                console.error("Lỗi khi điền dữ liệu:", err);
             }
-            // 4. Các ảnh khác
-            document.querySelectorAll('img:not(.c-farmer-img)').forEach(img => {
-                let src = img.getAttribute('src');
-                if (src && src.includes('<<')) {
-                    img.src = src.replace(placeholderRegex, (m, e) => {
-                        const f = getCleanFieldName(e);
-                        return data[f] || data['ID'] || m;
-                    });
-                }
-            });
-
-            // Xử lý overlay
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.style.opacity = '0';
-            setTimeout(() => { if (overlay) overlay.style.display = 'none'; }, 500);
-
-            console.log("Hoàn tất điền dữ liệu.");
-
-            console.log("Hoàn tất điền dữ liệu.");
         }
 
         window.addEventListener('load', fillDataFromUrl);
