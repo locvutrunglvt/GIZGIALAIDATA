@@ -2677,7 +2677,7 @@
 <body class="c139 doc-content">
     <h1 class="c61 c130"><span
             style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 377.30px; height: 61.48px;"><img
-                alt="" src="images/image1.jpg"
+                alt="" src="https://raw.githubusercontent.com/locvutrunglvt/GIZGIALAIDATA/refs/heads/main/Logo.jpg"
                 style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
                 title=""></span></h1>
     <h2 class="c9 c130"><span class="c69 c160">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</span></h2>
@@ -5011,6 +5011,10 @@
             const farmerId = urlParams.get('Farmer_ID');
             const apiUrl = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
 
+            // Show loading state
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = 'flex';
+
             let apiData = {};
             if (farmerId) {
                 try {
@@ -5034,128 +5038,173 @@
             function resolveValue(val, fieldName, context) {
                 if (val === undefined || val === null || val === '') return '';
 
-                // Construct Google Drive Image URL if field is ID and in image context
-                // context.table reveals if we are inside a sub-table loop
-                if (fieldName === 'ID' && (context.table === 'Related Images' || context.table === 'Images')) {
+                // Construct Google Drive Image URL
+                const isImageTable = context && (context.table === 'Related Images' || context.table === 'Images');
+                if (fieldName === 'ID' && isImageTable) {
                     return `https://drive.google.com/thumbnail?id=${val}`;
                 }
 
                 // Global Label Mapping
                 const ids = String(val).split(',').map(s => s.trim());
                 const labels = ids.map(id => {
-                    const found = dropdown.find(d => String(d.Drop_ID) === String(id) || String(d.drop_id) === String(id));
-                    return found ? found.label : id;
+                    if (!id) return '';
+                    const found = dropdown.find(d =>
+                        String(d.Drop_ID || d.drop_id) === String(id) ||
+                        String(d.ID || d.id) === String(id)
+                    );
+                    return found ? (found.label || found.Label || id) : id;
                 });
                 return labels.join(', ');
             }
 
             // Universal AppSheet Expression Resolver
             function resolveExp(expr, context) {
-                const clean = expr.replace(/\s+/g, ' ').trim();
+                const clean = expr.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
 
-                // Iterators
                 if (clean.match(/^Start:\s*\[(.*?)\]$/i)) return { type: 'START', table: clean.match(/\[(.*?)\]/)[1] };
                 if (clean.match(/^End$/i)) return { type: 'END' };
 
-                // Field Extraction
                 const fieldMatch = clean.match(/\[(.*?)\]/g);
                 if (!fieldMatch) return '';
 
                 let fieldName = fieldMatch[fieldMatch.length - 1].replace(/[\[\]]/g, '');
                 if (clean.match(/LOOKUP|SELECT/i)) {
-                    const internal = clean.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label)(.*?)(?=\s*\])/i);
+                    const internal = clean.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label|id)(.*?)(?=\s*\])/i);
                     if (internal) fieldName = internal[1].trim().replace(/^_THISROW\./, '');
                 }
 
-                if (fieldName === 'TT' && context.index !== undefined) return context.index + 1;
+                if (fieldName === 'TT' && context && context.index !== undefined) return context.index + 1;
 
-                const rawValue = context[fieldName] !== undefined ? context[fieldName] : (data[fieldName] || '');
+                const rawValue = (context && context[fieldName] !== undefined) ? context[fieldName] : (data[fieldName] || '');
                 return resolveValue(rawValue, fieldName, context);
             }
 
-            // 2. Sub-table Rendering (Tree-aware iteration)
-            function processSubTables(root) {
-                const children = Array.from(root.childNodes);
-                for (let i = 0; i < children.length; i++) {
-                    const node = children[i];
-                    if (node.nodeType === 1) { // Element
-                        const html = node.innerHTML || '';
-                        const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]\s*>>/i);
-                        if (startMatch) {
-                            const tableName = startMatch[1].trim();
-                            const tableData = data[tableName] ||
-                                data[tableName.replace('Related ', '')] ||
-                                data[tableName.replace(/s$/, '')] || [];
+            // 2. Sub-table Rendering (Row-Block Processor)
+            function processAllSubTables() {
+                const rows = Array.from(document.querySelectorAll('tr'));
+                for (let i = 0; i < rows.length; i++) {
+                    const tr = rows[i];
+                    const html = tr.innerHTML;
+                    const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]\s*>>/i) || html.match(/&lt;&lt;\s*Start:\s*\[(.*?)\]\s*&gt;&gt;/i);
 
-                            // AppSheet usually repeats the closest container element (tr, p, div)
-                            let template = node;
-                            const parent = node.parentNode;
+                    if (startMatch) {
+                        const tableName = startMatch[1].trim();
+                        const tableData = data[tableName] ||
+                            data[tableName.replace('Related ', '')] ||
+                            data[tableName.replace(/s$/, '')] || [];
 
-                            node.remove(); // Remove template from DOM
+                        let endIdx = -1;
+                        let blockRows = [];
 
-                            if (Array.isArray(tableData)) {
+                        if (html.match(/<<\s*End\s*>>/i) || html.match(/&lt;&lt;\s*End\s*&gt;&gt;/i)) {
+                            endIdx = i;
+                            blockRows = [tr];
+                        } else {
+                            blockRows.push(tr);
+                            for (let j = i + 1; j < rows.length; j++) {
+                                blockRows.push(rows[j]);
+                                if (rows[j].innerHTML.match(/<<\s*End\s*>>/i) || rows[j].innerHTML.match(/&lt;&lt;\s*End\s*&gt;&gt;/i)) {
+                                    endIdx = j;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (endIdx !== -1) {
+                            const parent = tr.parentNode;
+                            const template = blockRows.map(r => r.cloneNode(true));
+                            blockRows.forEach(r => r.remove());
+
+                            if (Array.isArray(tableData) && tableData.length > 0) {
                                 tableData.forEach((item, idx) => {
-                                    const instance = template.cloneNode(true);
-                                    const context = Object.assign({ index: idx, table: tableName }, item);
-
-                                    const resolveNode = (n) => {
-                                        if (n.nodeType === 3) {
-                                            n.nodeValue = n.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
-                                                const res = resolveExp(exp, context);
-                                                return (typeof res === 'object') ? '' : res;
-                                            });
-                                        } else if (n.nodeType === 1) {
-                                            Array.from(n.attributes).forEach(attr => {
-                                                attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
-                                                    const res = resolveExp(exp, context);
+                                    const instanceContext = Object.assign({ index: idx, table: tableName }, item);
+                                    template.forEach(tmplRow => {
+                                        const newRow = tmplRow.cloneNode(true);
+                                        const processChild = (n) => {
+                                            if (n.nodeType === 3) {
+                                                n.nodeValue = n.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
+                                                    const res = resolveExp(exp, instanceContext);
                                                     return (typeof res === 'object') ? '' : res;
                                                 });
-                                            });
-                                            n.childNodes.forEach(resolveNode);
-                                        }
-                                    };
-                                    resolveNode(instance);
-                                    parent.appendChild(instance);
+                                            } else if (n.nodeType === 1) {
+                                                Array.from(n.attributes).forEach(attr => {
+                                                    attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
+                                                        const res = resolveExp(exp, instanceContext);
+                                                        return (typeof res === 'object') ? '' : res;
+                                                    });
+                                                });
+                                                n.childNodes.forEach(processChild);
+                                            }
+                                        };
+                                        processChild(newRow);
+                                        parent.appendChild(newRow);
+                                    });
                                 });
                             }
-                            i--; // Node removed, adjust index
+                            i = endIdx;
                             continue;
                         }
-                        processSubTables(node);
                     }
                 }
+
+                // Handle non-row blocks
+                const blocks = Array.from(document.querySelectorAll('p, div'));
+                blocks.forEach(p => {
+                    const html = p.innerHTML;
+                    const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]/i) || html.match(/&lt;&lt;\s*Start:\s*\[(.*?)\]/i);
+                    const endMatch = html.match(/End\s*>>/i) || html.match(/End\s*&gt;&gt;/i);
+                    if (startMatch && endMatch) {
+                        const tableName = startMatch[1].trim();
+                        const tableData = data[tableName] || data[tableName.replace('Related ', '')] || [];
+                        const parent = p.parentNode;
+                        const template = p.cloneNode(true);
+                        p.remove();
+                        if (Array.isArray(tableData)) {
+                            tableData.forEach((item, idx) => {
+                                const instance = template.cloneNode(true);
+                                const context = Object.assign({ index: idx, table: tableName }, item);
+                                const walk = (n) => {
+                                    if (n.nodeType === 3) n.nodeValue = n.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                        const r = resolveExp(e, context); return typeof r === 'object' ? '' : r;
+                                    });
+                                    else if (n.nodeType === 1) {
+                                        Array.from(n.attributes).forEach(a => a.value = a.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                            const r = resolveExp(e, context); return typeof r === 'object' ? '' : r;
+                                        }));
+                                        n.childNodes.forEach(walk);
+                                    }
+                                };
+                                walk(instance);
+                                parent.appendChild(instance);
+                            });
+                        }
+                    }
+                });
             }
 
-            // 3. Global Fields Replacement
-            function finalReplace(node) {
+            // 3. Global Replacement
+            function finalPolish(node) {
                 if (node.nodeType === 3) {
-                    node.nodeValue = node.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
-                        const res = resolveExp(expr, {});
+                    node.nodeValue = node.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
+                        const res = resolveExp(expr, null);
                         return (typeof res === 'object') ? '' : res;
                     });
                 } else if (node.nodeType === 1) {
                     Array.from(node.attributes).forEach(attr => {
-                        attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
-                            const res = resolveExp(expr, {});
+                        attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
+                            const res = resolveExp(expr, null);
                             return (typeof res === 'object') ? '' : res;
                         });
                     });
-                    node.childNodes.forEach(finalReplace);
+                    node.childNodes.forEach(finalPolish);
                 }
             }
 
-            processSubTables(document.body);
-            finalReplace(document.body);
-
-            // 4. Final Layout Adjustment: Ensure <img> tags use Drive URLs
-            document.querySelectorAll('img').forEach(img => {
-                if (img.src && img.src.includes('<<') && img.src.includes('>>')) {
-                    // This should have been replaced in finalReplace, but double check
-                }
-            });
+            processAllSubTables();
+            finalPolish(document.body);
 
             document.body.classList.add('loaded');
-            document.getElementById('loading-overlay').style.display = 'none';
+            if (overlay) overlay.style.display = 'none';
         })();
     </script>
 </body>
