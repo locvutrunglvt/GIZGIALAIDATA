@@ -5046,15 +5046,14 @@
 
                 // Global Label Mapping
                 const ids = String(val).split(',').map(s => s.trim());
-                const labels = ids.map(id => {
+                const mappedLabels = ids.map(id => {
                     if (!id) return '';
                     const found = dropdown.find(d =>
-                        String(d.Drop_ID || d.drop_id) === String(id) ||
-                        String(d.ID || d.id) === String(id)
+                        String(d.Drop_ID || d.drop_id || d.drop_Id || d.ID || d.id || '') === String(id)
                     );
                     return found ? (found.label || found.Label || id) : id;
                 });
-                return labels.join(', ');
+                return mappedLabels.join(', ');
             }
 
             // Universal AppSheet Expression Resolver
@@ -5067,7 +5066,9 @@
                 const fieldMatch = clean.match(/\[(.*?)\]/g);
                 if (!fieldMatch) return '';
 
-                let fieldName = fieldMatch[fieldMatch.length - 1].replace(/[\[\]]/g, '');
+                const lastBracketed = fieldMatch[fieldMatch.length - 1];
+                let fieldName = lastBracketed.replace(/[\[\]]/g, '');
+
                 if (clean.match(/LOOKUP|SELECT/i)) {
                     const internal = clean.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label|id)(.*?)(?=\s*\])/i);
                     if (internal) fieldName = internal[1].trim().replace(/^_THISROW\./, '');
@@ -5079,116 +5080,101 @@
                 return resolveValue(rawValue, fieldName, context);
             }
 
-            // 2. Sub-table Rendering (Row-Block Processor)
+            // 2. Advanced Range-based Processor (Handles tags split across siblings)
             function processAllSubTables() {
-                const rows = Array.from(document.querySelectorAll('tr'));
-                for (let i = 0; i < rows.length; i++) {
-                    const tr = rows[i];
-                    const html = tr.innerHTML;
-                    const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]\s*>>/i) || html.match(/&lt;&lt;\s*Start:\s*\[(.*?)\]\s*&gt;&gt;/i);
+                const findRangeAndProcess = (root) => {
+                    if (!root || !root.childNodes) return;
+                    const nodes = Array.from(root.childNodes);
+                    for (let i = 0; i < nodes.length; i++) {
+                        const node = nodes[i];
+                        const html = (node.nodeType === 1) ? node.innerHTML : (node.nodeType === 3 ? node.nodeValue : '');
 
-                    if (startMatch) {
-                        const tableName = startMatch[1].trim();
-                        const tableData = data[tableName] ||
-                            data[tableName.replace('Related ', '')] ||
-                            data[tableName.replace(/s$/, '')] || [];
+                        const startMatch = html.match(/(?:<<|&lt;&lt;)\s*Start:\s*\[(.*?)\]\s*(?:>>|&gt;&gt;)/i);
+                        if (startMatch) {
+                            const tableName = startMatch[1].trim();
+                            const tableData = data[tableName] ||
+                                data[tableName.replace('Related ', '')] ||
+                                data[tableName.replace(/s$/, '')] || [];
 
-                        let endIdx = -1;
-                        let blockRows = [];
-
-                        if (html.match(/<<\s*End\s*>>/i) || html.match(/&lt;&lt;\s*End\s*&gt;&gt;/i)) {
-                            endIdx = i;
-                            blockRows = [tr];
-                        } else {
-                            blockRows.push(tr);
-                            for (let j = i + 1; j < rows.length; j++) {
-                                blockRows.push(rows[j]);
-                                if (rows[j].innerHTML.match(/<<\s*End\s*>>/i) || rows[j].innerHTML.match(/&lt;&lt;\s*End\s*&gt;&gt;/i)) {
+                            let endIdx = -1;
+                            for (let j = i; j < nodes.length; j++) {
+                                const siblingHtml = (nodes[j].nodeType === 1) ? nodes[j].innerHTML : (nodes[j].nodeType === 3 ? nodes[j].nodeValue : '');
+                                if (siblingHtml.match(/(?:<<|&lt;&lt;)\s*End\s*(?:>>|&gt;&gt;)/i)) {
                                     endIdx = j;
                                     break;
                                 }
                             }
-                        }
 
-                        if (endIdx !== -1) {
-                            const parent = tr.parentNode;
-                            const template = blockRows.map(r => r.cloneNode(true));
-                            blockRows.forEach(r => r.remove());
+                            if (endIdx !== -1) {
+                                const rangeNodes = nodes.slice(i, endIdx + 1);
+                                const parent = root;
+                                const nextSibling = nodes[endIdx + 1] || null;
 
-                            if (Array.isArray(tableData) && tableData.length > 0) {
-                                tableData.forEach((item, idx) => {
-                                    const instanceContext = Object.assign({ index: idx, table: tableName }, item);
-                                    template.forEach(tmplRow => {
-                                        const newRow = tmplRow.cloneNode(true);
-                                        const processChild = (n) => {
-                                            if (n.nodeType === 3) {
-                                                n.nodeValue = n.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
-                                                    const res = resolveExp(exp, instanceContext);
-                                                    return (typeof res === 'object') ? '' : res;
-                                                });
-                                            } else if (n.nodeType === 1) {
-                                                Array.from(n.attributes).forEach(attr => {
-                                                    attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
-                                                        const res = resolveExp(exp, instanceContext);
-                                                        return (typeof res === 'object') ? '' : res;
+                                rangeNodes.forEach(n => n.remove());
+
+                                if (Array.isArray(tableData) && tableData.length > 0) {
+                                    tableData.forEach((item, idx) => {
+                                        const context = Object.assign({ index: idx, table: tableName }, item);
+                                        rangeNodes.forEach(tmplNode => {
+                                            const instance = tmplNode.cloneNode(true);
+                                            const walkAndReplace = (n) => {
+                                                if (n.nodeType === 3) {
+                                                    let val = n.nodeValue;
+                                                    if (val.includes('<<') || val.includes('&lt;&lt;')) {
+                                                        val = val.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
+                                                            const res = resolveExp(exp, context);
+                                                            return (typeof res === 'object') ? '' : res;
+                                                        });
+                                                        if (val.includes('<img')) {
+                                                            const span = document.createElement('span');
+                                                            span.innerHTML = val.replace(/&quot;/g, '"');
+                                                            n.parentNode.replaceChild(span, n);
+                                                        } else {
+                                                            n.nodeValue = val;
+                                                        }
+                                                    }
+                                                } else if (n.nodeType === 1) {
+                                                    Array.from(n.attributes).forEach(attr => {
+                                                        attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
+                                                            const res = resolveExp(exp, context);
+                                                            return (typeof res === 'object') ? '' : res;
+                                                        });
                                                     });
-                                                });
-                                                n.childNodes.forEach(processChild);
-                                            }
-                                        };
-                                        processChild(newRow);
-                                        parent.appendChild(newRow);
+                                                    n.childNodes.forEach(walkAndReplace);
+                                                }
+                                            };
+                                            walkAndReplace(instance);
+                                            parent.insertBefore(instance, nextSibling);
+                                        });
                                     });
-                                });
+                                }
+                                i = endIdx;
+                                continue;
                             }
-                            i = endIdx;
-                            continue;
                         }
+                        if (node.nodeType === 1) findRangeAndProcess(node);
                     }
-                }
-
-                // Handle non-row blocks
-                const blocks = Array.from(document.querySelectorAll('p, div'));
-                blocks.forEach(p => {
-                    const html = p.innerHTML;
-                    const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]/i) || html.match(/&lt;&lt;\s*Start:\s*\[(.*?)\]/i);
-                    const endMatch = html.match(/End\s*>>/i) || html.match(/End\s*&gt;&gt;/i);
-                    if (startMatch && endMatch) {
-                        const tableName = startMatch[1].trim();
-                        const tableData = data[tableName] || data[tableName.replace('Related ', '')] || [];
-                        const parent = p.parentNode;
-                        const template = p.cloneNode(true);
-                        p.remove();
-                        if (Array.isArray(tableData)) {
-                            tableData.forEach((item, idx) => {
-                                const instance = template.cloneNode(true);
-                                const context = Object.assign({ index: idx, table: tableName }, item);
-                                const walk = (n) => {
-                                    if (n.nodeType === 3) n.nodeValue = n.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
-                                        const r = resolveExp(e, context); return typeof r === 'object' ? '' : r;
-                                    });
-                                    else if (n.nodeType === 1) {
-                                        Array.from(n.attributes).forEach(a => a.value = a.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
-                                            const r = resolveExp(e, context); return typeof r === 'object' ? '' : r;
-                                        }));
-                                        n.childNodes.forEach(walk);
-                                    }
-                                };
-                                walk(instance);
-                                parent.appendChild(instance);
-                            });
-                        }
-                    }
-                });
+                };
+                findRangeAndProcess(document.body);
             }
 
-            // 3. Global Replacement
+            // 3. Global Replacement for non-loop fields
             function finalPolish(node) {
                 if (node.nodeType === 3) {
-                    node.nodeValue = node.nodeValue.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
-                        const res = resolveExp(expr, null);
-                        return (typeof res === 'object') ? '' : res;
-                    });
+                    let val = node.nodeValue;
+                    if (val.includes('<<') || val.includes('&lt;&lt;')) {
+                        val = val.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
+                            const res = resolveExp(expr, null);
+                            return (typeof res === 'object') ? '' : res;
+                        });
+                        if (val.includes('<img')) {
+                            const span = document.createElement('span');
+                            span.innerHTML = val.replace(/&quot;/g, '"');
+                            node.parentNode.replaceChild(span, node);
+                        } else {
+                            node.nodeValue = val;
+                        }
+                    }
                 } else if (node.nodeType === 1) {
                     Array.from(node.attributes).forEach(attr => {
                         attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
