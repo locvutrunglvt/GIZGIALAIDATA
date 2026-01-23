@@ -2677,8 +2677,8 @@
 <body class="c139 doc-content">
     <h1 class="c61 c130"><span
             style="overflow: hidden; display: inline-block; margin: 0.00px 0.00px; border: 0.00px solid #000000; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px); width: 377.30px; height: 61.48px;"><img
-                alt="" src="https://raw.githubusercontent.com/locvutrunglvt/GIZGIALAIDATA/refs/heads/main/Logo.jpg"
-                style="width: 377px; height: auto; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
+                alt="" src="images/image1.jpg"
+                style="width: 377.30px; height: 61.48px; margin-left: 0.00px; margin-top: 0.00px; transform: rotate(0.00rad) translateZ(0px); -webkit-transform: rotate(0.00rad) translateZ(0px);"
                 title=""></span></h1>
     <h2 class="c9 c130"><span class="c69 c160">H&#7884;C VI&#7878;N N&Ocirc;NG NGHI&#7878;P VI&#7878;T NAM</span></h2>
     <h2 class="c9 c130"><span class="c69 c160">VI&#7878;N KINH T&#7870; V&Agrave; TH&#7874; CH&#7870; N&Ocirc;NG
@@ -2710,11 +2710,11 @@
             <td class="c65 c60" colspan="1" rowspan="1">
                 <p class="c33"><span class="c15">&nbsp;Gia Lai</span></p>
             </td>
-            <td class="c60 c109" colspan="2" rowspan="5" style="text-align: center; vertical-align: middle;">
-                <img id="Farmer_Photo" src="https://drive.google.com/thumbnail?id=<<[ID]>>"
-                    style="width: 4cm; height: 6cm; border: 1px solid #ccc; object-fit: cover; display: none;"
-                    alt="Ảnh đại diện" />
-                <div id="Image_Loading_Notice" style="font-size: 10px; color: #666;">Đang tải ảnh...</div>
+            <td class="c60 c109" colspan="2" rowspan="5">
+                <p class="c9"><span class="c3">&lt;&lt;Start: [Related Images]&gt;&gt;</span></p>
+                <p class="c9"><span class="c3">&nbsp; &nbsp; &lt;img
+                        src=&quot;https://drive.google.com/thumbnail?id=&lt;&lt;[ID]&gt;&gt;&quot; /&gt;</span></p>
+                <p class="c9"><span class="c3">&lt;&lt;End&gt;&gt;</span></p>
             </td>
         </tr>
         <tr class="c142">
@@ -4977,178 +4977,152 @@
             </td>
         </tr>
     </table>
-    <script>
-        /**
-         * Chức năng tự động lấy dữ liệu từ URL và điền vào các vị trí tương ứng trong HTML GỐC.
-         * Hỗ trợ văn bản hiển thị, thuộc tính 'src', và các biểu thức IF phức tạp cho danh xưng.
-         */
-        function fillDataFromUrl() {
-            try {
-                const params = new URLSearchParams(window.location.search);
-                const data = {};
-                for (const [key, value] of params.entries()) {
-                    data[key.trim()] = value;
-                }
+    <p class="c0"><span class="c3"></span></p>
+    <div id="loading-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; font-family: sans-serif;">
+        <div
+            style="border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite;">
+        </div>
+        <p style="margin-top: 15px; color: #555;">Đang tải dữ liệu hồ sơ...</p>
+    </div>
+    <style>
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
 
-                console.log("Dữ liệu nhận được từ URL:", data);
-
-                // 0. CHUẨN HÓA BẬC CAO: Sửa lỗi trình duyệt tự parse << >> thành các thẻ tag lạ
-                let rawHTML = document.body.innerHTML;
-
-                // Fix các thẻ tag sai dạng <start: [related="" hh_members]="">
-                rawHTML = rawHTML.replace(/<start:?\s*([^>]+)>/gi, (match, p1) => `<<Start: ${p1.replace(/=""/g, '').trim()}>>`);
-                rawHTML = rawHTML.replace(/<end>/gi, '<<End>>');
-                // Fix &lt;&lt; và &gt;&gt;
-                rawHTML = rawHTML.replace(/&lt;&lt;/g, '<<').replace(/&gt;&gt;/g, '>>');
-
-                document.body.innerHTML = rawHTML;
-
-                const placeholderRegex = /<<([\s\S]*?)>>/g;
-                const startRegex = /<<Start:\s*\[?(Related\s+)?(.*?)\]?>>/i;
-                const endRegex = /<<End>>/i;
-
-                function evaluateAppSheetExpression(expression, rowData) {
-                    let cleanExpr = expression.trim();
-                    cleanExpr = cleanExpr.replace(/<[^>]*>?/gm, ''); // Xóa HTML rác
-
-                    if (cleanExpr.includes("IF") && (cleanExpr.includes("Gender") || cleanExpr.includes("[Gender]"))) {
-                        const genderValue = rowData['Gender'] || data['Gender'] || "";
-                        if (genderValue.toLowerCase() === "nam") return "Ông";
-                        if (genderValue.toLowerCase().startsWith("n")) return "Bà";
-                    }
-
-                    const fieldMatch = cleanExpr.match(/\[(.*?)\]/);
-                    if (fieldMatch) {
-                        const fieldName = fieldMatch[1].trim();
-                        if (rowData[fieldName] !== undefined) return rowData[fieldName];
-                        if (data[fieldName] !== undefined) return data[fieldName];
-                    }
-
-                    if (rowData[cleanExpr] !== undefined) return rowData[cleanExpr];
-                    if (data[cleanExpr] !== undefined) return data[cleanExpr];
-                    return null;
-                }
-
-                // 1. XỬ LÝ VÒNG LẶP (START/END)
-                const rows = Array.from(document.querySelectorAll('tr'));
-                rows.forEach(tr => {
-                    const content = tr.innerHTML;
-                    const matchStart = content.match(startRegex);
-
-                    if (matchStart) {
-                        const tableName = matchStart[2].replace(/[\[\]]/g, '').trim();
-                        const parent = tr.parentNode;
-
-                        let index = 0;
-                        const records = [];
-                        while (true) {
-                            const prefix = `${tableName}_${index}_`;
-                            const rowData = {};
-                            let found = false;
-                            for (const [key, value] of params.entries()) {
-                                if (key.startsWith(prefix)) {
-                                    const field = key.replace(prefix, "");
-                                    rowData[field] = value;
-                                    found = true;
-                                }
-                            }
-                            if (!found) break;
-                            records.push(rowData);
-                            index++;
-                        }
-
-                        if (records.length > 0) {
-                            records.forEach((rowData, idx) => {
-                                const newRow = tr.cloneNode(true);
-                                newRow.innerHTML = newRow.innerHTML.replace(placeholderRegex, (match, expr) => {
-                                    if (startRegex.test(expr)) expr = expr.replace(startRegex, '').trim();
-                                    if (endRegex.test(expr)) expr = expr.replace(endRegex, '').trim();
-                                    if (!expr) return "";
-                                    const val = evaluateAppSheetExpression(expr, rowData);
-                                    return val !== null ? val : "";
-                                });
-                                parent.insertBefore(newRow, tr);
-                            });
-                            parent.removeChild(tr);
-                        } else {
-                            tr.innerHTML = tr.innerHTML.replace(placeholderRegex, "");
-                        }
-                    }
-                });
-
-                // 2. scalar replacement
-                function replaceTextInNode(node) {
-                    if (node.nodeType === 3) {
-                        const text = node.nodeValue;
-                        if (text.includes('<<')) {
-                            node.nodeValue = text.replace(placeholderRegex, (match, expr) => {
-                                const val = evaluateAppSheetExpression(expr, {});
-                                return val !== null ? val : match;
-                            });
-                        }
-                    } else if (node.nodeType === 1) {
-                        if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
-                        ['title', 'alt'].forEach(attr => {
-                            const val = node.getAttribute(attr);
-                            if (val && val.includes('<<')) {
-                                node.setAttribute(attr, val.replace(placeholderRegex, (match, expr) => {
-                                    const res = evaluateAppSheetExpression(expr, {});
-                                    return res !== null ? res : match;
-                                }));
-                            }
-                        });
-                        Array.from(node.childNodes).forEach(replaceTextInNode);
-                    }
-                }
-                replaceTextInNode(document.body);
-
-                // 3. Ảnh chân dung
-                const photoContainer = document.getElementById('Related_Images_CONTAINER_TOP');
-                if (photoContainer) {
-                    let ids = [];
-                    ['Farmer_ID', 'ID', 'Image_ID', 'Photo', 'Images'].forEach(k => {
-                        params.getAll(k).forEach(v => {
-                            ids = ids.concat(v.split(',').map(s => s.trim()).filter(s => s));
-                        });
-                    });
-                    const uniqueIds = [...new Set(ids)];
-                    if (uniqueIds.length > 0) {
-                        photoContainer.querySelectorAll('img.c-farmer-img').forEach(img => img.remove());
-                        uniqueIds.forEach(id => {
-                            const img = document.createElement('img');
-                            img.className = 'c-farmer-img';
-                            img.style.cssText = 'display:block;width:151px;height:227px;object-fit:cover;margin:5px auto;';
-                            img.src = `https://drive.google.com/thumbnail?id=${id}`;
-                            const notice = document.getElementById('Image_Loading_Notice');
-                            img.onload = () => { if (notice) notice.style.display = 'none'; };
-                            photoContainer.appendChild(img);
-                        });
-                    }
-                }
-
-                // 4. Các ảnh khác
-                document.querySelectorAll('img:not(.c-farmer-img)').forEach(img => {
-                    let src = img.getAttribute('src');
-                    if (src && src.includes('<<')) {
-                        img.src = src.replace(placeholderRegex, (m, e) => {
-                            const f = e.match(/\[(.*?)\]/)?.[1] || e.trim();
-                            return data[f] || data['ID'] || m;
-                        });
-                    }
-                });
-
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.style.display = 'none', 500);
-                }
-                console.log("Hoàn tất điền dữ liệu.");
-            } catch (err) {
-                console.error("Lỗi khi điền dữ liệu:", err);
+            100% {
+                transform: rotate(360deg);
             }
         }
 
-        window.addEventListener('load', fillDataFromUrl);
+        body {
+            visibility: hidden;
+        }
+
+        body.loaded {
+            visibility: visible;
+        }
+    </style>
+
+    <script>
+        (async function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const farmerId = urlParams.get('Farmer_ID');
+            const apiUrl = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
+
+            let apiData = {};
+            if (farmerId) {
+                try {
+                    const response = await fetch(`${apiUrl}?Farmer_ID=${farmerId}`);
+                    apiData = await response.json();
+                    console.log('API Data loaded:', apiData);
+                } catch (e) {
+                    console.error('Failed to fetch API data:', e);
+                }
+            }
+
+            const data = {};
+            for (let [key, value] of urlParams.entries()) {
+                data[key] = decodeURIComponent(value);
+            }
+            Object.assign(data, apiData);
+
+            const dropdown = apiData.dropdown || [];
+            function resolveValue(val) {
+                if (val === undefined || val === null || val === '') return '';
+                const ids = String(val).split(',').map(s => s.trim());
+                const labels = ids.map(id => {
+                    const found = dropdown.find(d => String(d.Drop_ID) === String(id) || String(d.drop_id) === String(id));
+                    return found ? found.label : id;
+                });
+                return labels.join(', ');
+            }
+
+            function resolveAppSheetExpression(expr, contextData) {
+                const cleanExpr = expr.replace(/\s+/g, ' ').trim();
+                const startMatch = cleanExpr.match(/Start:\s*\[(.*?)\]/i);
+                if (startMatch) return { type: 'START', table: startMatch[1].trim() };
+                if (cleanExpr.match(/End/i)) return { type: 'END' };
+
+                const fieldMatches = cleanExpr.match(/\[(.*?)\]/g);
+                if (!fieldMatches) return '';
+
+                let fieldName = fieldMatches[fieldMatches.length - 1].replace(/[\[\]]/g, '');
+                if (cleanExpr.match(/LOOKUP|SELECT/i)) {
+                    const internalMatch = cleanExpr.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label)(.*?)(?=\s*\])/i);
+                    if (internalMatch) fieldName = internalMatch[1].trim().replace(/^_THISROW\./, '');
+                }
+
+                if (fieldName === 'TT' && contextData.index !== undefined) return contextData.index + 1;
+                const rawValue = contextData[fieldName] !== undefined ? contextData[fieldName] : (data[fieldName] || '');
+                if (cleanExpr.match(/LOOKUP|SELECT/i)) return resolveValue(rawValue);
+                return rawValue;
+            }
+
+            const allRows = Array.from(document.querySelectorAll('tr'));
+            allRows.forEach(tr => {
+                const text = tr.innerHTML;
+                const startMatch = text.match(/<<\s*(Start:[\s\S]*?)\s*>>/i);
+                if (startMatch) {
+                    const res = resolveAppSheetExpression(startMatch[1], {});
+                    if (res.type === 'START') {
+                        const tableName = res.table;
+                        const tableData = data[tableName] ||
+                            data[tableName.replace('Related ', '')] ||
+                            data[tableName.replace(/s$/, '')] || [];
+                        const parent = tr.parentNode;
+                        const templateRow = tr.cloneNode(true);
+                        tr.remove();
+
+                        if (Array.isArray(tableData)) {
+                            tableData.forEach((item, index) => {
+                                const newRow = templateRow.cloneNode(true);
+                                const context = Object.assign({ index }, item);
+                                function processNode(node) {
+                                    if (node.nodeType === 3) {
+                                        node.nodeValue = node.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
+                                            const resolved = resolveAppSheetExpression(exp, context);
+                                            return (typeof resolved === 'object') ? '' : resolved;
+                                        });
+                                    } else if (node.nodeType === 1) {
+                                        Array.from(node.attributes).forEach(attr => {
+                                            attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
+                                                const resolved = resolveAppSheetExpression(exp, context);
+                                                return (typeof resolved === 'object') ? '' : resolved;
+                                            });
+                                        });
+                                        node.childNodes.forEach(processNode);
+                                    }
+                                }
+                                processNode(newRow);
+                                parent.appendChild(newRow);
+                            });
+                        }
+                    }
+                }
+            });
+
+            function walk(node) {
+                if (node.nodeType === 3) {
+                    node.nodeValue = node.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
+                        const resolved = resolveAppSheetExpression(expr, {});
+                        return (typeof resolved === 'object') ? '' : resolved;
+                    });
+                } else if (node.nodeType === 1) {
+                    Array.from(node.attributes).forEach(attr => {
+                        attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
+                            const resolved = resolveAppSheetExpression(expr, {});
+                            return (typeof resolved === 'object') ? '' : resolved;
+                        });
+                    });
+                    node.childNodes.forEach(walk);
+                }
+            }
+            walk(document.body);
+            document.body.classList.add('loaded');
+            document.getElementById('loading-overlay').style.display = 'none';
+        })();
     </script>
 </body>
 
