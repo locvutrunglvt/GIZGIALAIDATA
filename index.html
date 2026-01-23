@@ -5011,7 +5011,6 @@
             const farmerId = urlParams.get('Farmer_ID');
             const apiUrl = 'https://script.google.com/macros/s/AKfycbwFchEzhV3NQ23F_cnUwSt3M0ZodDNCopx8EyZE2Tbe2HZTLqaKvjTbZtMhnvplKsBE/exec';
 
-            // Show loading state
             const overlay = document.getElementById('loading-overlay');
             if (overlay) overlay.style.display = 'flex';
 
@@ -5020,173 +5019,187 @@
                 try {
                     const response = await fetch(`${apiUrl}?Farmer_ID=${farmerId}`);
                     apiData = await response.json();
-                    console.log('API Data loaded:', apiData);
-                } catch (e) {
-                    console.error('Failed to fetch API data:', e);
-                }
+                } catch (e) { console.error('API Error:', e); }
             }
 
             const data = {};
-            for (let [key, value] of urlParams.entries()) {
-                data[key] = decodeURIComponent(value);
-            }
+            for (let [key, value] of urlParams.entries()) { data[key] = decodeURIComponent(value); }
             Object.assign(data, apiData);
 
             const dropdown = apiData.dropdown || [];
 
-            // 1. Label Mapping & Image URL Construction
-            function resolveValue(val, fieldName, context) {
-                if (val === undefined || val === null || val === '') return '';
-
-                // Construct Google Drive Image URL
-                const isImageTable = context && (context.table === 'Related Images' || context.table === 'Images');
-                if (fieldName === 'ID' && isImageTable) {
-                    return `https://drive.google.com/thumbnail?id=${val}`;
-                }
-
-                // Global Label Mapping
-                const ids = String(val).split(',').map(s => s.trim());
-                const mappedLabels = ids.map(id => {
-                    if (!id) return '';
-                    const found = dropdown.find(d =>
-                        String(d.Drop_ID || d.drop_id || d.drop_Id || d.ID || d.id || '') === String(id)
-                    );
-                    return found ? (found.label || found.Label || id) : id;
+            // 1. Better Label Mapping
+            function findLabel(id) {
+                if (!id) return '';
+                const searchId = String(id).trim().toLowerCase();
+                const found = dropdown.find(d => {
+                    for (let k in d) {
+                        if (k.toLowerCase().includes('id') && String(d[k]).trim().toLowerCase() === searchId) return true;
+                    }
+                    return false;
                 });
-                return mappedLabels.join(', ');
+                return found ? (found.label || found.Label || id) : id;
             }
 
-            // Universal AppSheet Expression Resolver
+            function resolveVal(val, fieldName, context) {
+                if (val === undefined || val === null || val === '') return '';
+
+                // Drive Image ID -> URL
+                const isImg = context && (String(context.table).includes('Image'));
+                if (fieldName === 'ID' && isImg) return `https://drive.google.com/thumbnail?id=${val}`;
+
+                // Multi-value or Single Mapping
+                const parts = String(val).split(',').map(s => s.trim());
+                return parts.map(p => findLabel(p)).join(', ');
+            }
+
+            // Universal Resolver
             function resolveExp(expr, context) {
                 const clean = expr.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim();
-
-                if (clean.match(/^Start:\s*\[(.*?)\]$/i)) return { type: 'START', table: clean.match(/\[(.*?)\]/)[1] };
-                if (clean.match(/^End$/i)) return { type: 'END' };
-
                 const fieldMatch = clean.match(/\[(.*?)\]/g);
                 if (!fieldMatch) return '';
 
-                const lastBracketed = fieldMatch[fieldMatch.length - 1];
-                let fieldName = lastBracketed.replace(/[\[\]]/g, '');
-
+                let fieldName = fieldMatch[fieldMatch.length - 1].replace(/[\[\]]/g, '');
                 if (clean.match(/LOOKUP|SELECT/i)) {
                     const internal = clean.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label|id)(.*?)(?=\s*\])/i);
                     if (internal) fieldName = internal[1].trim().replace(/^_THISROW\./, '');
                 }
 
                 if (fieldName === 'TT' && context && context.index !== undefined) return context.index + 1;
-
-                const rawValue = (context && context[fieldName] !== undefined) ? context[fieldName] : (data[fieldName] || '');
-                return resolveValue(rawValue, fieldName, context);
+                const raw = (context && context[fieldName] !== undefined) ? context[fieldName] : (data[fieldName] || '');
+                return resolveVal(raw, fieldName, context);
             }
 
-            // 2. Advanced Range-based Processor (Handles tags split across siblings)
-            function processAllSubTables() {
-                const findRangeAndProcess = (root) => {
-                    if (!root || !root.childNodes) return;
-                    const nodes = Array.from(root.childNodes);
-                    for (let i = 0; i < nodes.length; i++) {
-                        const node = nodes[i];
-                        const html = (node.nodeType === 1) ? node.innerHTML : (node.nodeType === 3 ? node.nodeValue : '');
+            // 2. Stable Row-Block Processor
+            function processRows() {
+                const rows = Array.from(document.querySelectorAll('tr'));
+                for (let i = 0; i < rows.length; i++) {
+                    const tr = rows[i];
+                    const html = tr.innerHTML;
+                    const startMatch = html.match(/(?:<<|&lt;&lt;)\s*Start:\s*\[(.*?)\]\s*(?:>>|&gt;&gt;)/i);
 
-                        const startMatch = html.match(/(?:<<|&lt;&lt;)\s*Start:\s*\[(.*?)\]\s*(?:>>|&gt;&gt;)/i);
-                        if (startMatch) {
-                            const tableName = startMatch[1].trim();
-                            const tableData = data[tableName] ||
-                                data[tableName.replace('Related ', '')] ||
-                                data[tableName.replace(/s$/, '')] || [];
+                    if (startMatch) {
+                        const tableName = startMatch[1].trim();
+                        const tableData = data[tableName] || data[tableName.replace('Related ', '')] || data[tableName.replace(/s$/, '')] || [];
 
-                            let endIdx = -1;
-                            for (let j = i; j < nodes.length; j++) {
-                                const siblingHtml = (nodes[j].nodeType === 1) ? nodes[j].innerHTML : (nodes[j].nodeType === 3 ? nodes[j].nodeValue : '');
-                                if (siblingHtml.match(/(?:<<|&lt;&lt;)\s*End\s*(?:>>|&gt;&gt;)/i)) {
-                                    endIdx = j;
-                                    break;
+                        let endIdx = -1;
+                        let block = [tr];
+
+                        if (!html.match(/(?:<<|&lt;&lt;)\s*End\s*(?:>>|&gt;&gt;)/i)) {
+                            for (let j = i + 1; j < rows.length; j++) {
+                                block.push(rows[j]);
+                                if (rows[j].innerHTML.match(/(?:<<|&lt;&lt;)\s*End\s*(?:>>|&gt;&gt;)/i)) {
+                                    endIdx = j; break;
                                 }
                             }
+                        } else { endIdx = i; }
 
-                            if (endIdx !== -1) {
-                                const rangeNodes = nodes.slice(i, endIdx + 1);
-                                const parent = root;
-                                const nextSibling = nodes[endIdx + 1] || null;
+                        if (endIdx !== -1) {
+                            const parent = tr.parentNode;
+                            const next = rows[endIdx + 1] || null;
+                            const tmpl = block.map(r => r.cloneNode(true));
+                            block.forEach(r => r.remove());
 
-                                rangeNodes.forEach(n => n.remove());
-
-                                if (Array.isArray(tableData) && tableData.length > 0) {
-                                    tableData.forEach((item, idx) => {
-                                        const context = Object.assign({ index: idx, table: tableName }, item);
-                                        rangeNodes.forEach(tmplNode => {
-                                            const instance = tmplNode.cloneNode(true);
-                                            const walkAndReplace = (n) => {
-                                                if (n.nodeType === 3) {
-                                                    let val = n.nodeValue;
-                                                    if (val.includes('<<') || val.includes('&lt;&lt;')) {
-                                                        val = val.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
-                                                            const res = resolveExp(exp, context);
-                                                            return (typeof res === 'object') ? '' : res;
-                                                        });
-                                                        if (val.includes('<img')) {
-                                                            const span = document.createElement('span');
-                                                            span.innerHTML = val.replace(/&quot;/g, '"');
-                                                            n.parentNode.replaceChild(span, n);
-                                                        } else {
-                                                            n.nodeValue = val;
-                                                        }
-                                                    }
-                                                } else if (n.nodeType === 1) {
-                                                    Array.from(n.attributes).forEach(attr => {
-                                                        attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, exp) => {
-                                                            const res = resolveExp(exp, context);
-                                                            return (typeof res === 'object') ? '' : res;
-                                                        });
+                            if (Array.isArray(tableData)) {
+                                tableData.forEach((item, idx) => {
+                                    const ctx = Object.assign({ index: idx, table: tableName }, item);
+                                    tmpl.forEach(t => {
+                                        const inst = t.cloneNode(true);
+                                        const walk = (n) => {
+                                            if (n.nodeType === 3) {
+                                                let v = n.nodeValue;
+                                                v = v.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                                    const r = resolveExp(e, ctx);
+                                                    return (typeof r === 'object') ? '' : r;
+                                                });
+                                                if (v.includes('<img')) {
+                                                    const s = document.createElement('span'); s.innerHTML = v.replace(/&quot;/g, '"');
+                                                    n.parentNode.replaceChild(s, n);
+                                                } else { n.nodeValue = v; }
+                                            } else if (n.nodeType === 1) {
+                                                Array.from(n.attributes).forEach(a => {
+                                                    a.value = a.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                                        const r = resolveExp(e, ctx); return (typeof r === 'object') ? '' : r;
                                                     });
-                                                    n.childNodes.forEach(walkAndReplace);
-                                                }
-                                            };
-                                            walkAndReplace(instance);
-                                            parent.insertBefore(instance, nextSibling);
-                                        });
+                                                });
+                                                n.childNodes.forEach(walk);
+                                            }
+                                        };
+                                        walk(inst);
+                                        parent.insertBefore(inst, next);
                                     });
-                                }
-                                i = endIdx;
-                                continue;
+                                });
                             }
+                            i = endIdx; continue;
                         }
-                        if (node.nodeType === 1) findRangeAndProcess(node);
                     }
-                };
-                findRangeAndProcess(document.body);
+                }
             }
 
-            // 3. Global Replacement for non-loop fields
+            // 3. Simple Block Processor (p, div)
+            function processBlocks() {
+                const blocks = Array.from(document.querySelectorAll('p, div'));
+                blocks.forEach(p => {
+                    const html = p.innerHTML;
+                    const start = html.match(/(?:<<|&lt;&lt;)\s*Start:\s*\[(.*?)\]\s*(?:>>|&gt;&gt;)/i);
+                    const end = html.match(/(?:<<|&lt;&lt;)\s*End\s*(?:>>|&gt;&gt;)/i);
+                    if (start && end) {
+                        const tableName = start[1].trim();
+                        const tableData = data[tableName] || data[tableName.replace('Related ', '')] || [];
+                        const parent = p.parentNode;
+                        const tmpl = p.cloneNode(true);
+                        p.remove();
+                        if (Array.isArray(tableData)) {
+                            tableData.forEach((item, idx) => {
+                                const inst = tmpl.cloneNode(true);
+                                const ctx = Object.assign({ index: idx, table: tableName }, item);
+                                const walk = (n) => {
+                                    if (n.nodeType === 3) {
+                                        let v = n.nodeValue;
+                                        v = v.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                            const r = resolveExp(e, ctx); return (typeof r === 'object') ? '' : r;
+                                        });
+                                        if (v.includes('<img')) {
+                                            const s = document.createElement('span'); s.innerHTML = v.replace(/&quot;/g, '"');
+                                            n.parentNode.replaceChild(s, n);
+                                        } else { n.nodeValue = v; }
+                                    } else if (n.nodeType === 1) {
+                                        Array.from(n.attributes).forEach(a => a.value = a.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                                            const r = resolveExp(e, ctx); return (typeof r === 'object') ? '' : r;
+                                        }));
+                                        n.childNodes.forEach(walk);
+                                    }
+                                };
+                                walk(inst);
+                                parent.appendChild(inst);
+                            });
+                        }
+                    }
+                });
+            }
+
             function finalPolish(node) {
                 if (node.nodeType === 3) {
-                    let val = node.nodeValue;
-                    if (val.includes('<<') || val.includes('&lt;&lt;')) {
-                        val = val.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
-                            const res = resolveExp(expr, null);
-                            return (typeof res === 'object') ? '' : res;
+                    let v = node.nodeValue;
+                    if (v.includes('<<') || v.includes('&lt;&lt;')) {
+                        v = v.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                            const r = resolveExp(e, null); return (typeof r === 'object') ? '' : r;
                         });
-                        if (val.includes('<img')) {
-                            const span = document.createElement('span');
-                            span.innerHTML = val.replace(/&quot;/g, '"');
-                            node.parentNode.replaceChild(span, node);
-                        } else {
-                            node.nodeValue = val;
-                        }
+                        if (v.includes('<img')) {
+                            const s = document.createElement('span'); s.innerHTML = v.replace(/&quot;/g, '"');
+                            node.parentNode.replaceChild(s, node);
+                        } else { node.nodeValue = v; }
                     }
                 } else if (node.nodeType === 1) {
-                    Array.from(node.attributes).forEach(attr => {
-                        attr.value = attr.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, expr) => {
-                            const res = resolveExp(expr, null);
-                            return (typeof res === 'object') ? '' : res;
-                        });
-                    });
+                    Array.from(node.attributes).forEach(a => a.value = a.value.replace(/(?:<<|&lt;&lt;)\s*([\s\S]*?)\s*(?:>>|&gt;&gt;)/g, (m, e) => {
+                        const r = resolveExp(e, null); return (typeof r === 'object') ? '' : r;
+                    }));
                     node.childNodes.forEach(finalPolish);
                 }
             }
 
-            processAllSubTables();
+            processRows();
+            processBlocks();
             finalPolish(document.body);
 
             document.body.classList.add('loaded');
