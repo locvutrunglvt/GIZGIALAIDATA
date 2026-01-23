@@ -5028,17 +5028,13 @@
 
             const dropdown = apiData.dropdown || [];
 
-            // 1. Better Label Mapping
             function findLabel(id) {
                 if (!id) return '';
-                const searchId = String(id).trim().toLowerCase();
-                const found = dropdown.find(d => {
-                    for (let k in d) {
-                        if (k.toLowerCase().includes('id') && String(d[k]).trim().toLowerCase() === searchId) return true;
-                    }
-                    return false;
-                });
-                return found ? (found.label || found.Label || id) : id;
+                const searchId = String(id).trim();
+                const found = dropdown.find(d =>
+                    String(d.Drop_ID || d.drop_id || d.ID || d.id || '').trim() === searchId
+                );
+                return found ? (found.Label || found.label || id) : id;
             }
 
             function resolveVal(val, fieldName, context) {
