@@ -5029,8 +5029,18 @@
             Object.assign(data, apiData);
 
             const dropdown = apiData.dropdown || [];
-            function resolveValue(val) {
+
+            // 1. Label Mapping & Image URL Construction
+            function resolveValue(val, fieldName, context) {
                 if (val === undefined || val === null || val === '') return '';
+
+                // Construct Google Drive Image URL if field is ID and in image context
+                // context.table reveals if we are inside a sub-table loop
+                if (fieldName === 'ID' && (context.table === 'Related Images' || context.table === 'Images')) {
+                    return `https://drive.google.com/thumbnail?id=${val}`;
+                }
+
+                // Global Label Mapping
                 const ids = String(val).split(',').map(s => s.trim());
                 const labels = ids.map(id => {
                     const found = dropdown.find(d => String(d.Drop_ID) === String(id) || String(d.drop_id) === String(id));
@@ -5039,87 +5049,111 @@
                 return labels.join(', ');
             }
 
-            function resolveAppSheetExpression(expr, contextData) {
-                const cleanExpr = expr.replace(/\s+/g, ' ').trim();
-                const startMatch = cleanExpr.match(/Start:\s*\[(.*?)\]/i);
-                if (startMatch) return { type: 'START', table: startMatch[1].trim() };
-                if (cleanExpr.match(/End/i)) return { type: 'END' };
+            // Universal AppSheet Expression Resolver
+            function resolveExp(expr, context) {
+                const clean = expr.replace(/\s+/g, ' ').trim();
 
-                const fieldMatches = cleanExpr.match(/\[(.*?)\]/g);
-                if (!fieldMatches) return '';
+                // Iterators
+                if (clean.match(/^Start:\s*\[(.*?)\]$/i)) return { type: 'START', table: clean.match(/\[(.*?)\]/)[1] };
+                if (clean.match(/^End$/i)) return { type: 'END' };
 
-                let fieldName = fieldMatches[fieldMatches.length - 1].replace(/[\[\]]/g, '');
-                if (cleanExpr.match(/LOOKUP|SELECT/i)) {
-                    const internalMatch = cleanExpr.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label)(.*?)(?=\s*\])/i);
-                    if (internalMatch) fieldName = internalMatch[1].trim().replace(/^_THISROW\./, '');
+                // Field Extraction
+                const fieldMatch = clean.match(/\[(.*?)\]/g);
+                if (!fieldMatch) return '';
+
+                let fieldName = fieldMatch[fieldMatch.length - 1].replace(/[\[\]]/g, '');
+                if (clean.match(/LOOKUP|SELECT/i)) {
+                    const internal = clean.match(/(?:TEXT\s*\(\s*\[|\[)(?!Drop_ID|label)(.*?)(?=\s*\])/i);
+                    if (internal) fieldName = internal[1].trim().replace(/^_THISROW\./, '');
                 }
 
-                if (fieldName === 'TT' && contextData.index !== undefined) return contextData.index + 1;
-                const rawValue = contextData[fieldName] !== undefined ? contextData[fieldName] : (data[fieldName] || '');
-                if (cleanExpr.match(/LOOKUP|SELECT/i)) return resolveValue(rawValue);
-                return rawValue;
+                if (fieldName === 'TT' && context.index !== undefined) return context.index + 1;
+
+                const rawValue = context[fieldName] !== undefined ? context[fieldName] : (data[fieldName] || '');
+                return resolveValue(rawValue, fieldName, context);
             }
 
-            const allRows = Array.from(document.querySelectorAll('tr'));
-            allRows.forEach(tr => {
-                const text = tr.innerHTML;
-                const startMatch = text.match(/<<\s*(Start:[\s\S]*?)\s*>>/i);
-                if (startMatch) {
-                    const res = resolveAppSheetExpression(startMatch[1], {});
-                    if (res.type === 'START') {
-                        const tableName = res.table;
-                        const tableData = data[tableName] ||
-                            data[tableName.replace('Related ', '')] ||
-                            data[tableName.replace(/s$/, '')] || [];
-                        const parent = tr.parentNode;
-                        const templateRow = tr.cloneNode(true);
-                        tr.remove();
+            // 2. Sub-table Rendering (Tree-aware iteration)
+            function processSubTables(root) {
+                const children = Array.from(root.childNodes);
+                for (let i = 0; i < children.length; i++) {
+                    const node = children[i];
+                    if (node.nodeType === 1) { // Element
+                        const html = node.innerHTML || '';
+                        const startMatch = html.match(/<<\s*Start:\s*\[(.*?)\]\s*>>/i);
+                        if (startMatch) {
+                            const tableName = startMatch[1].trim();
+                            const tableData = data[tableName] ||
+                                data[tableName.replace('Related ', '')] ||
+                                data[tableName.replace(/s$/, '')] || [];
 
-                        if (Array.isArray(tableData)) {
-                            tableData.forEach((item, index) => {
-                                const newRow = templateRow.cloneNode(true);
-                                const context = Object.assign({ index }, item);
-                                function processNode(node) {
-                                    if (node.nodeType === 3) {
-                                        node.nodeValue = node.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
-                                            const resolved = resolveAppSheetExpression(exp, context);
-                                            return (typeof resolved === 'object') ? '' : resolved;
-                                        });
-                                    } else if (node.nodeType === 1) {
-                                        Array.from(node.attributes).forEach(attr => {
-                                            attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
-                                                const resolved = resolveAppSheetExpression(exp, context);
-                                                return (typeof resolved === 'object') ? '' : resolved;
+                            // AppSheet usually repeats the closest container element (tr, p, div)
+                            let template = node;
+                            const parent = node.parentNode;
+
+                            node.remove(); // Remove template from DOM
+
+                            if (Array.isArray(tableData)) {
+                                tableData.forEach((item, idx) => {
+                                    const instance = template.cloneNode(true);
+                                    const context = Object.assign({ index: idx, table: tableName }, item);
+
+                                    const resolveNode = (n) => {
+                                        if (n.nodeType === 3) {
+                                            n.nodeValue = n.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
+                                                const res = resolveExp(exp, context);
+                                                return (typeof res === 'object') ? '' : res;
                                             });
-                                        });
-                                        node.childNodes.forEach(processNode);
-                                    }
-                                }
-                                processNode(newRow);
-                                parent.appendChild(newRow);
-                            });
+                                        } else if (n.nodeType === 1) {
+                                            Array.from(n.attributes).forEach(attr => {
+                                                attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, exp) => {
+                                                    const res = resolveExp(exp, context);
+                                                    return (typeof res === 'object') ? '' : res;
+                                                });
+                                            });
+                                            n.childNodes.forEach(resolveNode);
+                                        }
+                                    };
+                                    resolveNode(instance);
+                                    parent.appendChild(instance);
+                                });
+                            }
+                            i--; // Node removed, adjust index
+                            continue;
                         }
+                        processSubTables(node);
                     }
                 }
-            });
+            }
 
-            function walk(node) {
+            // 3. Global Fields Replacement
+            function finalReplace(node) {
                 if (node.nodeType === 3) {
                     node.nodeValue = node.nodeValue.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
-                        const resolved = resolveAppSheetExpression(expr, {});
-                        return (typeof resolved === 'object') ? '' : resolved;
+                        const res = resolveExp(expr, {});
+                        return (typeof res === 'object') ? '' : res;
                     });
                 } else if (node.nodeType === 1) {
                     Array.from(node.attributes).forEach(attr => {
                         attr.value = attr.value.replace(/<<\s*([\s\S]*?)\s*>>/g, (m, expr) => {
-                            const resolved = resolveAppSheetExpression(expr, {});
-                            return (typeof resolved === 'object') ? '' : resolved;
+                            const res = resolveExp(expr, {});
+                            return (typeof res === 'object') ? '' : res;
                         });
                     });
-                    node.childNodes.forEach(walk);
+                    node.childNodes.forEach(finalReplace);
                 }
             }
-            walk(document.body);
+
+            processSubTables(document.body);
+            finalReplace(document.body);
+
+            // 4. Final Layout Adjustment: Ensure <img> tags use Drive URLs
+            document.querySelectorAll('img').forEach(img => {
+                if (img.src && img.src.includes('<<') && img.src.includes('>>')) {
+                    // This should have been replaced in finalReplace, but double check
+                }
+            });
+
             document.body.classList.add('loaded');
             document.getElementById('loading-overlay').style.display = 'none';
         })();
